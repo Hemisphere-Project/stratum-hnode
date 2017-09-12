@@ -1,0 +1,4 @@
+- Test MQTT Bandwidth with 1470 bytes in QOS0 (full upgrade, fast)
+- Test MQTT Bandwidth with 100 bytes in QOS0 (partial upgrade, fast)
+- Test MQTT Bandwidth with 1470 bytes in QOS1 (full upgrade, confirmed)
+- Test MQTT Bandwidth with 100 bytes in QOS1 (partial upgrade, confirmed)
