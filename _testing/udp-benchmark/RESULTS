@@ -1,0 +1,6 @@
+## Benchmark 1 - 12 / 09 / 2017
+# Wifi (101)
+# UNICAST
+
+1470 bytes payload (= 490 Led): 450 FPS
+3 bytes payload (= 1 Led): 630 FPS
