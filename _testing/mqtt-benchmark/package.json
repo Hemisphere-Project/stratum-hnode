@@ -5,6 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "aedes": "^0.30.0",
+    "mosca": "^2.5.2",
     "mqtt": "^2.13.0"
   },
   "devDependencies": {},

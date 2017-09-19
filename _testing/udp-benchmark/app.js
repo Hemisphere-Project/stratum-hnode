@@ -2,12 +2,12 @@ var dgram = require('dgram');
 var fps = require('../benchmark.js');
 
 var PORT = 3737;
-var CLIENT = '192.168.0.50';
+var CLIENT = '192.168.0.19';
 
 //
 // Message
 //
-var nLeds = 1;
+var nLeds = 490;
 //var message = new Buffer('My KungFu is Good!');
 var ledPayload = Buffer.alloc(nLeds*3, 45);
 
