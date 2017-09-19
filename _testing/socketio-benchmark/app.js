@@ -1,6 +1,6 @@
 var http = require('http');
 var fs = require('fs');
-var process = require('process');
+var fps = require('../benchmark.js');
 
 // Loading the index file . html displayed to the client
 var server = http.createServer(function(req, res) {
@@ -25,15 +25,6 @@ for (var k=0; k<ledsN*3; k++) payload[k] = Math.floor(Math.random() * 256);
 payload = payload.toString('ascii');
 
 
-var pingTime;
-var pingAvg = [];
-var avgSize = 500;
-
-function timenow() {
-  var hrTime = process.hrtime()
-  return hrTime[0] * 1000 + hrTime[1] / 1000000;
-}
-
 // When a client connects, we note it in the console
 io.sockets.on('connection', function (client) {
     console.log('A client is connected!');
@@ -41,14 +32,10 @@ io.sockets.on('connection', function (client) {
 
     client.on("pong", function(data){
       console.log('got pong with "'+data+'" sending back ping');
-      pingAvg.unshift(1000/(timenow()-pingTime));
-      if (pingAvg.length > avgSize) pingAvg.pop();
-      console.log('frame rate: '+pingAvg.reduce((pv, cv) => pv+cv, 0)/pingAvg.length);
-      pingTime = timenow();
+      fps.ping(true);
       client.emit("ping", payload);
     });
-
-    pingTime = timenow();
+    
     client.emit("ping", payload);
 });
 

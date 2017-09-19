@@ -1,20 +1,8 @@
 var dgram = require('dgram');
+var fps = require('../benchmark.js');
 
 var PORT = 3737;
 var CLIENT = '192.168.0.50';
-
-//
-// Benchmark
-//
-var pingTime = 0;
-var pingAvg = [];
-var avgSize = 500;
-var process = require('process');
-
-function timenow() {
-  var hrTime = process.hrtime()
-  return hrTime[0] * 1000 + hrTime[1] / 1000000;
-}
 
 //
 // Message
@@ -56,16 +44,9 @@ server.on('listening', function () {
 
 server.on('message', function (message, remote) {
     //console.log(remote.address + ':' + remote.port +' - ' + message);
-    pingAvg.unshift(1000/(timenow()-pingTime));
-    if (pingAvg.length > avgSize) pingAvg.pop();
-    console.log('frame rate: '+pingAvg.reduce((pv, cv) => pv+cv, 0)/pingAvg.length);
-    pingTime = timenow();
+    fps.ping(true);
     udpSend(ledPayload);
 });
-
-
-
-
 
 //
 // RUN

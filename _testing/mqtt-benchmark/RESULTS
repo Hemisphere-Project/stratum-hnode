@@ -1,0 +1,11 @@
+## Benchmark 1 - 12 / 09 / 2017
+# Wifi (interweb)
+# MQTT over TCP
+
+# QOS 1
+1260 bytes payload (= 420 Led): 25 FPS
+3 bytes payload (= 1 Led): 50 FPS
+
+# QOS 0
+1260 bytes payload (= 420 Led): 125 FPS
+3 bytes payload (= 1 Led): 920 FPS
