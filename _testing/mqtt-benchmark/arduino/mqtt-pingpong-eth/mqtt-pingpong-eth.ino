@@ -2,14 +2,15 @@
 #include <Ethernet2.h>
 #include <PubSubClient.h>
 
+//#define USE_DHCP 1
 #define DEBUG 1     // Comment to disable Serial
 //#define DEBUG_MSG 1     // Comment to disable Serial
-//#define WIZ_RESET 2
+#define WIZ_RESET 2
 #define WIZ_CS 15
 
 byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-IPAddress ip(192, 168, 0, 177);       // fallback IP address (if no DHCP available)
-IPAddress server(192, 168, 0, 47);    // MQTT Broker (server)
+IPAddress ip(192, 168, 0, 29);       // fallback IP address (if no DHCP available)
+IPAddress server(192, 168, 0, 32);    // MQTT Broker (server)
 
 
 EthernetClient ethClient;
@@ -64,7 +65,7 @@ void setup() {
   
   // SERIAL
   #if defined(DEBUG)
-    Serial.begin(500000);
+    Serial.begin(115200);
     delay(100);
     Serial.println("\nHello!");
   #endif
@@ -91,12 +92,17 @@ void setup() {
 
   // ETH start
   Ethernet.init(WIZ_CS);
-  if (Ethernet.begin(mac) == 0) {
-    #if defined(DEBUG)
-      Serial.println("DHCP failed... fallback to static");
-    #endif
-    Ethernet.begin(mac, ip);
-  }
+  #if defined(USE_DHCP)
+    if (Ethernet.begin(mac) == 0) {
+      #if defined(DEBUG)
+        Serial.println("DHCP failed... fallback to static");
+      #endif
+      Ethernet.begin(mac, ip);
+    }
+  #else
+    Ethernet.begin(mac, ip);  
+  #endif
+  
   #if defined(DEBUG)
     Serial.print("HNode IP: ");
     Serial.println(Ethernet.localIP());

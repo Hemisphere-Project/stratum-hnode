@@ -2,7 +2,7 @@ var dgram = require('dgram');
 var fps = require('../benchmark.js');
 
 var PORT = 3737;
-var CLIENT = '192.168.0.19';
+var CLIENT = '192.168.0.29';
 
 //
 // Message

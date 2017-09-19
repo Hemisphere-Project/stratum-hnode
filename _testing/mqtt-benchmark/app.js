@@ -1,6 +1,5 @@
 
 var PORT = 3737
-var CLIENT = '192.168.0.50'
 var QOS = 0
 
 var fps = require('../benchmark.js')
@@ -11,7 +10,7 @@ var ENGINE = 1;
 //
 // Message
 //
-var nLeds = 40;
+var nLeds = 90;
 var ledPayload = Buffer.alloc(nLeds*3, 44);
 
 //
