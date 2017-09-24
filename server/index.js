@@ -1,4 +1,5 @@
 var dgram = require('dgram');
+const EventEmitter = require('events');
 
 var PORT = 3737;          // Working UDP port
 
@@ -15,144 +16,203 @@ function log(msg) {
   console.log(msg);
 }
 
-function Client(ip, info) {
-  var that = this;
+class Worker extends EventEmitter {
+  constructor() {
+    super();
 
-  this.ip = ip;
-  this.name = info["name"];
-  this.tick = 0;
-  this.payload = null;
-  this.timerate = 10;
-  this.udp = null;
-  this.timer = null;
-  this.autoRefresh = false;
+    this.isRunning  = false;
+    this.timer      = null;
+    this.timerate   = TIME_TICK;
 
-  // start auto refresh
-  this.start = function() {
-    this.timer = null;
-    this.autoRefresh = true;
-    this.refresh();
-    console.log("Client running at "+that.timerate);
   }
 
-  // set payload sent during auto refresh
-  this.set = function(p) {
+  start() {
+    if (this.isRunning) this.stop();
+    this.isRunning  = true;
+    this.emit('start');
+    this.next();
+  }
+
+  next() {
+    var that = this;
+    this.timer = setTimeout( function() {
+      if (!that.isRunning) return;
+      that.emit('tick');
+      that.next();
+    }, that.timerate);
+  }
+
+  stop()  {
+    if (this.timer != null) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    this.isRunning  = false;
+    this.emit('stop');
+  }
+
+  setRate(tr) {
+    this.timerate = tr;
+    log('new rate: '+ tr);
+  }
+
+}
+
+class Client extends Worker {
+  constructor(ip, info) {
+    super();
+    var that = this;
+
+    this.ip = ip;
+    this.name = info["name"];
+    this.noNews = 0;
+    this.payload = null;
+    this.udp = null;
+    this.infoCounter = 0;
+
+    // send payload at every ticks
+    this.on('tick', this.send);
+
+    // stop udp
+    this.on('stop', function() {
+      if (that.udp != null) {
+        that.udp.close();
+        that.udp = null;
+      }
+      that.infoCounter = 0;
+    });
+
+  }
+
+  set(p) {
     this.payload = p;
   }
 
-  // refresh function: send payload to client
-  this.refresh = function() {
-    if (that.udp == null) that.udp = dgram.createSocket('udp4');
-    if (that.payload != null)
-      that.udp.send(that.payload, 0, that.payload.length, PORT, ip, function(err, bytes) {
+  update(info) {
+
+    // update received: should be running
+    if (!this.isRunning) this.start();
+
+    // first info received (since last reset)
+    if (this.infoCounter == 0) this.emit('online');
+
+    // state record
+    this.infoCounter += 1;
+    this.noNews = 0;
+
+    // adjust refresh rate
+    if (this.timerate < info["processing"]) // Processing takes more time => slow down
+      this.setRate(this.timerate + Math.round(info["processing"]*0.3));   // Growing 30%
+
+    else if (info["dataRate"] > info["processing"]+10) // 10ms for data transmission is too much => speed up
+      this.setRate(Math.max(10,Math.round(info["dataRate"]*0.7)));     // Reducing 30%
+
+    else if (this.timerate < info["dataRate"]) // Timerate is going too fast, dataRate doesn't follow => slow down
+      this.setRate(this.timerate + Math.round(info["dataRate"]*0.3));     // Growing 30%
+
+    // inform data received
+    this.emit('received', info);
+
+    var data = Buffer.alloc(NLEDS*3 )
+    for (var k = 0; k<NLEDS*3; k+=3)  data[k] = Math.floor(Math.random() * 255)
+    this.set( data);
+  }
+
+  check() {
+    this.noNews += 1;
+
+    // state control
+    if (this.noNews == TICK_OFFLINE) {
+      this.infoCounter = 0;
+      this.emit('offline');
+    }
+    if (this.noNews == TICK_GONE) this.stop();
+
+  }
+
+  send() {
+    var that = this;
+    if (this.udp == null) this.udp = dgram.createSocket('udp4');
+    if (this.payload != null)
+      this.udp.send(this.payload, 0, this.payload.length, PORT, this.ip, function(err, bytes) {
           if (err) throw err;
-          //console.log('UDP message of '+that.payload.length+' bytes sent to ' + ip +':'+ PORT);
+          that.emit('sent', this.payload);
       });
-    if (that.autoRefresh) setTimeout(that.refresh, that.timerate);
-    else that.stop();
   }
 
-  // stop auto refresh and close udp socket
-  this.stop = function() {
-    if (that.udp != null) {
-      that.udp.close();
-      that.udp = null;
-    }
-    this.autoRefresh = false;
-    this.infoCounter = 0;
-  }
-
-  // client sent updated info
-  this.update = function(info) {
-    if(this.autoRefresh) this.infoCounter += 1;
-
-    // adjust refresh rate if device is lagging behind
-    if (this.infoCounter > 3 && info["lastData"] > this.timerate) {
-      this.timerate = info["lastData"]+1;
-      console.log('new timerate: '+this.timerate)
-    }
-  }
 }
 
-function Server() {
-  var that = this;
+class Server extends Worker {
+  constructor() {
+    super();
+    var that = this;
+    this.clients = {};
 
-  this.clients = {};
+    this.on('start', function() {
+      that.udpSocket.bind(PORT);
+    });
 
-  this.udpSocket = dgram.createSocket('udp4');
+    this.on('stop', function() {
+      that.udpSocket.close();
+      for (var ip in that.clients) that.clients[ip].stop();
+    });
 
-  this.udpSocket.on('error', (err) => {
-    console.log(`socket error:\n${err.stack}`);
-    this.udpSocket.close();
-  });
+    this.on('tick', function() {
+      for (var ip in that.clients) that.clients[ip].check();
+    });
 
-  this.udpSocket.on('listening', function () {
-      var address = that.udpSocket.address();
-      console.log('UDP Server listening on ' + address.address + ":" + address.port);
-  });
-
-  // Message received from client
-  this.udpSocket.on('message', function (message, remote) {
-      //console.log(remote.address + ':' + remote.port +' - ' + message);
-      var ip = remote.address;
-      var info = JSON.parse(message);
-      var isNew = false;
-
-      // Create client if new
-      if (that.clients[ip] == null) {
-        that.clients[ip] = new Client(ip, info);
-        // TODO emit NEW
-        console.log(ip+" is NEW");
-        isNew = true;
-
-        // TODO: remove (test payload)
-        that.clients[ip].set( Buffer.alloc(NLEDS*3, 254) );
-      }
-
-      // Back Online if previously Offline
-      if (that.clients[ip].tick >= TICK_OFFLINE || isNew) {
-           // TODO emit ONLINE
-           that.clients[ip].start();
-           console.log(ip+" is ONLINE");
-      }
-
-      // Update client
-      that.clients[ip].tick = 0;
-      that.clients[ip].update(info);
-  });
-
-  // Start client watchdog
-  this.start = function() {
-    this.timer = setInterval(that.ticker, 100);
-    this.udpSocket.bind(PORT);
+    this.configureUDP();
   }
 
-  // Stop client watchdog
-  this.stop = function() {
-    clearInterval(this.timer);
-    for (var ip in that.clients) that.clients[ip].stop();
-  }
+  configureUDP() {
+    var that = this;
 
-  // Client watchdog function
-  this.ticker = function() {
-    for (var ip in that.clients) {
-      if (that.clients[ip] !== null) {
-        that.clients[ip].tick += 1;
-        if (that.clients[ip].tick == TICK_OFFLINE) {
-          that.clients[ip].infoCounter = 0;
-          console.log(ip+" is OFFLINE");
-        }; // TODO emit OFFLINE
-        if (that.clients[ip].tick == TICK_GONE) {
-          that.clients[ip].stop();
-          console.log(ip+" is GONE");
-          // TODO emit GONE
+    this.udpSocket = dgram.createSocket('udp4');
+
+    this.udpSocket.on('error', (err) => {
+      console.log(`socket error:\n${err.stack}`);
+      that.udpSocket.close();
+    });
+
+    this.udpSocket.on('listening', function () {
+        var address = that.udpSocket.address();
+        console.log('UDP Server listening on ' + address.address + ":" + address.port);
+    });
+
+    // Message received from client
+    this.udpSocket.on('message', function (message, remote) {
+        var ip = remote.address;
+        var info = JSON.parse(message);
+
+        // Create client if new
+        if (that.clients[ip] == null) {
+          that.clients[ip] = new Client(ip, info);
+          that.emit('new', that.clients[ip]);
+
+          // LOG
+          that.clients[ip].on('start', function(){ log('start '+ip) });
+          that.clients[ip].on('online', function(){ log('online '+ip) });
+          that.clients[ip].on('offline', function(){ log('offline '+ip) });
+          that.clients[ip].on('stop', function(){ log('stop '+ip) });
+
+          //that.clients[ip].on('sent', function(){ log('sent '+ip) });
         }
-        //console.log('tick: '+that.clients[ip].tick)
-      }
-    }
+
+        console.log(ip + ':' + remote.port +' - ' + message+' / '+that.clients[ip].timerate);
+
+        // Update client
+        that.clients[ip].update(info);
+    });
   }
 
 }
 
+
+// START Server
 var server = new Server();
 server.start();
+
+// set test payload
+server.on('new', function(client){
+  client.set( Buffer.alloc(NLEDS*3, 254) );
+});
