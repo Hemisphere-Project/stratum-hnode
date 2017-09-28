@@ -243,11 +243,11 @@ class Server extends Worker {
     });
   }
 
-  getClientByIP(ip) {
+  getNodeByIP(ip) {
     return that.clients[ip];
   }
 
-  getClientByName(name) {
+  getNodeByName(name) {
     for (var ip in that.clients)
       if (that.clients[ip].name == name) return that.clients[ip];
   }
