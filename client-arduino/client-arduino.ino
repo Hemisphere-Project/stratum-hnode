@@ -23,9 +23,9 @@ const int INFO_TIME = 300;
 EthernetUDP Udp;
 unsigned int udpPort = 3737;  // local port to listen on
 const int MTUu = 1472;  // Usable MTU (1500 - 20 IP - 8 UDP)
-char incomingPacket[MTUu];  // buffer for incoming packets
+byte incomingPacket[MTUu];  // buffer for incoming packets
 
-#define WIZ_RESET 2
+#define WIZ_RESET 3
 #define WIZ_CS 15
 
 char  nodeName[] = "HNodeX";  // a reply string to send back
@@ -46,7 +46,7 @@ void setup()
   #endif
 
   // LEDS
-  FastLED.addLeds<NEOPIXEL, 16>(leds[0], NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, 2>(leds[0], NUM_LEDS_PER_STRIP);
   FastLED.addLeds<NEOPIXEL, 5>(leds[1], NUM_LEDS_PER_STRIP);
   FastLED.addLeds<NEOPIXEL, 4>(leds[2], NUM_LEDS_PER_STRIP);
   FastLED.addLeds<NEOPIXEL, 0>(leds[3], NUM_LEDS_PER_STRIP);
@@ -116,10 +116,10 @@ void loop()
     if (len > 0) incomingPacket[len] = 0;
 
     // UPDATE LEDs with data received
-    /*for(int x = 0; x < NUM_STRIPS; x++) 
-      for(int i = 0; i < NUM_LEDS_PER_STRIP; i++)
-        for(int k = 0; k < 4; k++)
-          leds[x][i][k] = k*80;*/
+    for(int x = 0; x < NUM_STRIPS; x++) 
+      for(int i = 0; i < NUM_LEDS_PER_STRIP; i++) 
+        for(int k = 0; k < 3; k++) 
+          leds[x][i][k] = incomingPacket[x*NUM_LEDS_PER_STRIP+i*3+k];
 
     // LED Update
     FastLED.show();  

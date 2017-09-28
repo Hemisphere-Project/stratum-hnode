@@ -7,8 +7,10 @@ var TIME_TICK = 100;      // Watchdog timer ms
 var TIME_OFFLINE = 1000;  // Offline Time
 var TIME_GONE = 3000;     // Gone Time
 
-var NLEDS = 490;
+var NLEDS_STRIPS = 90;    // N leds per strips
+var NSTRIPS_CLIENT = 4;   // N strips per client
 
+var NLEDS = NLEDS_STRIPS * NSTRIPS_CLIENT;
 var TICK_OFFLINE = TIME_OFFLINE/TIME_TICK;
 var TICK_GONE = TIME_GONE/TIME_TICK;
 
@@ -53,7 +55,8 @@ class Worker extends EventEmitter {
 
   setRate(tr) {
     this.timerate = tr;
-    log('new rate: '+ tr);
+    log('FPS: '+ Math.round(100000/tr)/100);
+
   }
 
 }
@@ -66,9 +69,9 @@ class Client extends Worker {
     this.ip = ip;
     this.name = info["name"];
     this.noNews = 0;
-    this.payload = null;
     this.udp = null;
     this.infoCounter = 0;
+    this.payload = Buffer.alloc(NLEDS*3, 0);
 
     // send payload at every ticks
     this.on('tick', this.send);
@@ -84,8 +87,46 @@ class Client extends Worker {
 
   }
 
-  set(p) {
-    this.payload = p;
+  _set(buffer) {
+    this.payload = buffer;
+  }
+
+  //
+  // args:  [ [ [r,g,b], [r,g,b], ... ], ... ]
+  //
+  setAll(rgbs) {
+    for(var strip = 0; strip < NSTRIPS_CLIENT; strip += 1) {
+      for (var led = 0; led < NLEDS_STRIPS; led+=1) {
+        var key = (strip*NLEDS_STRIPS+led)*3;
+        this.payload[key+led] = rgbs[led][0];
+        this.payload[key+led+1] = rgbs[led][1];
+        this.payload[key+led+2] = rgbs[led][2];
+      }
+    }
+  }
+
+  //
+  // args: strip n°, [ [r,g,b], [r,g,b], ... ]
+  //
+  setStrip(strip, rgbs) {
+    if (strip >= NSTRIPS_CLIENT) return;
+    var key = (strip*NLEDS_STRIPS)*3;
+    for (var led = 0; led < NLEDS_STRIPS; led+=1) {
+      this.payload[key+led] = rgbs[led][0];
+      this.payload[key+led+1] = rgbs[led][1];
+      this.payload[key+led+2] = rgbs[led][2];
+    }
+  }
+
+  //
+  // args: strip n°, led n°, [r,g,b]
+  //
+  setLed(strip, led, rgb) {
+    var key = (strip*NLEDS_STRIPS+led)*3;
+    if (key >= NLEDS) return;
+    this.payload[key] = rgb[0];
+    this.payload[key+1] = rgb[1];
+    this.payload[key+2] = rgb[2];
   }
 
   update(info) {
@@ -105,17 +146,16 @@ class Client extends Worker {
       this.setRate(this.timerate + Math.round(info["processing"]*0.3));   // Growing 30%
 
     else if (info["dataRate"] > info["processing"]+10) // 10ms for data transmission is too much => speed up
-      this.setRate(Math.max(10,Math.round(info["dataRate"]*0.7)));     // Reducing 30%
+      this.setRate(Math.max(10,Math.round(info["dataRate"]*0.6)));     // Reducing 30%
 
     else if (this.timerate < info["dataRate"]) // Timerate is going too fast, dataRate doesn't follow => slow down
       this.setRate(this.timerate + Math.round(info["dataRate"]*0.3));     // Growing 30%
 
+    // simplified auto-rate based on processing time + 5ms
+    //this.setRate(info["processing"]+5);
+
     // inform data received
     this.emit('received', info);
-
-    var data = Buffer.alloc(NLEDS*3 )
-    for (var k = 0; k<NLEDS*3; k+=3)  data[k] = Math.floor(Math.random() * 255)
-    this.set( data);
   }
 
   check() {
@@ -138,6 +178,14 @@ class Client extends Worker {
           if (err) throw err;
           that.emit('sent', this.payload);
       });
+  }
+
+  randomize() {
+    // random payload
+    var data = Buffer.alloc(NLEDS*3 );
+    for (var k = 0; k<NLEDS*3; k+=1)
+      data[k] = Math.floor(Math.random() * 255)
+    this._set(data);
   }
 
 }
@@ -176,7 +224,7 @@ class Server extends Worker {
 
     this.udpSocket.on('listening', function () {
         var address = that.udpSocket.address();
-        console.log('UDP Server listening on ' + address.address + ":" + address.port);
+        console.log('UDP Server listening on port ' + address.port);
     });
 
     // Message received from client
@@ -187,32 +235,24 @@ class Server extends Worker {
         // Create client if new
         if (that.clients[ip] == null) {
           that.clients[ip] = new Client(ip, info);
-          that.emit('new', that.clients[ip]);
-
-          // LOG
-          that.clients[ip].on('start', function(){ log('start '+ip) });
-          that.clients[ip].on('online', function(){ log('online '+ip) });
-          that.clients[ip].on('offline', function(){ log('offline '+ip) });
-          that.clients[ip].on('stop', function(){ log('stop '+ip) });
-
-          //that.clients[ip].on('sent', function(){ log('sent '+ip) });
+          that.emit('newnode', that.clients[ip]);
         }
-
-        console.log(ip + ':' + remote.port +' - ' + message+' / '+that.clients[ip].timerate);
 
         // Update client
         that.clients[ip].update(info);
     });
   }
 
+  getClientByIP(ip) {
+    return that.clients[ip];
+  }
+
+  getClientByName(name) {
+    for (var ip in that.clients)
+      if (that.clients[ip].name == name) return that.clients[ip];
+  }
+
 }
 
-
-// START Server
-var server = new Server();
-server.start();
-
-// set test payload
-server.on('new', function(client){
-  client.set( Buffer.alloc(NLEDS*3, 254) );
-});
+// Export as module
+exports.Server = Server;
