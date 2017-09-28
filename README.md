@@ -3,29 +3,29 @@ NodeJS Server / esp8266+W5500 Node
 
 You can find a basic usage in demo.js
 
-###Install
+### Install
 You need to copy Hnode directory in your project.
 
-###Basic usage
+### Basic usage
 ```
   var hnode = require('./Hnode');   // load library
   var server = new hnode.Server();  // instantiate a server
   server.start();                   // start the server
 ```
 
-###API
-####Server methods:
+### API
+#### Server methods:
   `.getNodeByIP( ip )`      
     return a Node or undefined
 
   `.getNodeByName( name )`  
        return a Node or undefined
 
-####Server events:
+#### Server events:
   `.on('newnode', function(node){ ... })`   
        triggered when a new Node is discovered
 
-####Node methods:
+#### Node methods:
   `.setLed( strip, led, rgb )`   
        apply rgb array to a specific led, rgb = [r, g, b]
 
@@ -38,11 +38,11 @@ You need to copy Hnode directory in your project.
   `.randomize()`   
        randomize all values of the node's leds
 
-####Node attributes (read-only):
+#### Node attributes (read-only):
   `.name`   
   `.ip`
 
-####Node events:
+#### Node events:
   `.on('start', function(node){ ... }) `  
        triggered when a node is started
 
