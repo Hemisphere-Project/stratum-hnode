@@ -16,10 +16,19 @@ You need to copy Hnode directory in your project.
 ### API
 #### Server methods:
   `.getNodeByIP( ip )`      
-    return a Node or undefined
+      return a Node or undefined
 
   `.getNodeByName( name )`  
        return a Node or undefined
+
+  `.getAllNodes()`  
+      return an array with all known Nodes
+
+  `.setAll( rgb )`  
+      apply rgb array to every leds, rgb = [r,g,b]
+
+  `.blackout()`  
+      switch off every leds
 
 #### Server events:
   `.on('newnode', function(node){ ... })`   

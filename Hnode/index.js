@@ -244,12 +244,29 @@ class Server extends Worker {
   }
 
   getNodeByIP(ip) {
-    return that.clients[ip];
+    return this.clients[ip];
   }
 
   getNodeByName(name) {
-    for (var ip in that.clients)
-      if (that.clients[ip].name == name) return that.clients[ip];
+    for (var ip in this.clients)
+      if (this.clients[ip].name == name) return this.clients[ip];
+  }
+
+  getAllNodes() {
+    var nodes = [];
+    for (var ip in this.clients) nodes.push(this.client[ip]);
+    return nodes;
+  }
+
+  setAll(rgb) {
+    for (var ip in this.clients)
+      for(var strip=0; strip < NSTRIPS_CLIENT; strip += 1)
+        for(var led=0; led < NLEDS_STRIPS; led += 1)
+          this.client[ip].setLed(strip, led, rgb);
+  }
+
+  blackout() {
+    this.setAll([0,0,0]);
   }
 
 }
