@@ -9,16 +9,16 @@ var server = new hnode.Server();
 server.on('newnode', function(node) {
 
   // Event: when the node start
-  node.on('start', function(){ log('start '+ip) });
+  node.on('start', function(node){ console.log('start '+this.ip) });
 
   // Event: when the node goes online
-  node.on('online', function(){ log('online '+ip) });
+  node.on('online', function(node){ console.log('online '+this.ip) });
 
   // Event: when the node goes offline
-  node.on('offline', function(){ log('offline '+ip) });
+  node.on('offline', function(node){ console.log('offline '+this.ip) });
 
   // Event: when the node stop
-  node.on('stop', function(){ log('stop '+ip) });
+  node.on('stop', function(node){ console.log('stop '+this.ip) });
 
 });
 

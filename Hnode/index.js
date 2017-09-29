@@ -254,7 +254,7 @@ class Server extends Worker {
 
   getAllNodes() {
     var nodes = [];
-    for (var ip in this.clients) nodes.push(this.client[ip]);
+    for (var ip in this.clients) nodes.push(this.clients[ip]);
     return nodes;
   }
 
@@ -262,7 +262,7 @@ class Server extends Worker {
     for (var ip in this.clients)
       for(var strip=0; strip < NSTRIPS_CLIENT; strip += 1)
         for(var led=0; led < NLEDS_STRIPS; led += 1)
-          this.client[ip].setLed(strip, led, rgb);
+          this.clients[ip].setLed(strip, led, rgb);
   }
 
   blackout() {
