@@ -143,6 +143,7 @@ void loop()
     root["name"] = nodeName;
     root["processing"] = workTime + infoTime;
     root["dataRate"] = dataRate;
+    root["port"] = udpPort_node;
     char message[200];
     root.printTo(message, sizeof(message));
 

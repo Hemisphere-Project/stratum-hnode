@@ -2,7 +2,6 @@ var dgram = require('dgram');
 const EventEmitter = require('events');
 
 var PORT_SERVER = 3737;          // Working UDP port
-var PORT_NODE = 3738;          // Working UDP port
 
 var TIME_TICK = 100;      // Watchdog timer ms
 var TIME_OFFLINE = 1000;  // Offline Time
@@ -69,6 +68,7 @@ class Client extends Worker {
 
     this.ip = ip;
     this.name = info["name"];
+    this.port = info["port"];
     this.noNews = 0;
     this.udp = null;
     this.infoCounter = 0;
@@ -175,7 +175,7 @@ class Client extends Worker {
     var that = this;
     if (this.udp == null) this.udp = dgram.createSocket('udp4');
     if (this.payload != null)
-      this.udp.send(this.payload, 0, this.payload.length, PORT_NODE, this.ip, function(err, bytes) {
+      this.udp.send(this.payload, 0, this.payload.length, this.port, this.ip, function(err, bytes) {
           if (err) throw err;
           that.emit('sent', this.payload);
       });
@@ -203,11 +203,11 @@ class Server extends Worker {
 
     this.on('stop', function() {
       that.udpSocket.close();
-      for (var ip in that.clients) that.clients[ip].stop();
+      for (var name in that.clients) that.clients[name].stop();
     });
 
     this.on('tick', function() {
-      for (var ip in that.clients) that.clients[ip].check();
+      for (var name in that.clients) that.clients[name].check();
     });
 
     this.configureUDP();
@@ -232,38 +232,39 @@ class Server extends Worker {
     this.udpSocket.on('message', function (message, remote) {
         var ip = remote.address;
         var info = JSON.parse(message.toString('UTF-8'));
+        var name = info['name'];
 
         // Create client if new
-        if (that.clients[ip] == null) {
-          that.clients[ip] = new Client(ip, info);
-          that.emit('newnode', that.clients[ip]);
+        if (that.clients[name] == null) {
+          that.clients[name] = new Client(ip, info);
+          that.emit('newnode', that.clients[name]);
         }
 
         // Update client
-        that.clients[ip].update(info);
+        that.clients[name].update(info);
     });
   }
 
   getNodeByIP(ip) {
-    return this.clients[ip];
+    for (var name in this.clients)
+      if (this.clients[name].ip == ip) return this.clients[name];
   }
 
   getNodeByName(name) {
-    for (var ip in this.clients)
-      if (this.clients[ip].name == name) return this.clients[ip];
+    return this.clients[name];
   }
 
   getAllNodes() {
     var nodes = [];
-    for (var ip in this.clients) nodes.push(this.clients[ip]);
+    for (var name in this.clients) nodes.push(this.clients[name]);
     return nodes;
   }
 
   setAll(rgb) {
-    for (var ip in this.clients)
+    for (var name in this.clients)
       for(var strip=0; strip < NSTRIPS_CLIENT; strip += 1)
         for(var led=0; led < NLEDS_STRIPS; led += 1)
-          this.clients[ip].setLed(strip, led, rgb);
+          this.clients[name].setLed(strip, led, rgb);
   }
 
   blackout() {
