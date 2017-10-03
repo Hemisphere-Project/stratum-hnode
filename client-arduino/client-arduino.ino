@@ -120,7 +120,7 @@ void loop()
     for(int x = 0; x < NUM_STRIPS; x++)
       for(int i = 0; i < NUM_LEDS_PER_STRIP; i++)
         for(int k = 0; k < 3; k++)
-          leds[x][i][k] = incomingPacket[x*NUM_LEDS_PER_STRIP+i*3+k];
+          leds[x][i][k] = incomingPacket[x*NUM_LEDS_PER_STRIP*3+i*3+k];
 
     // LED Update
     FastLED.show();
