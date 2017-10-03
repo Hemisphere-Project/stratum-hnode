@@ -27,11 +27,13 @@ server.start();
 
 // App example
 var myFPS = 25;
+var count = 0;
 setInterval(function() {
   server.setAll([255,0,0]);   // set every leds to red
   server.blackout();          // switch off every leds
+  count += 1;
   server.getAllNodes().forEach(function(node) {
     node.randomize();                   // randomize all leds of the node
-    node.setLed(0, 10, [255,255,255]);  // set strip 0, led 60 to white
+    //node.setLed(Math.floor(count/90), (count%90), [255,255,255]);  // set strip 0, led 60 to white
   });
 }, Math.round(1000/myFPS));

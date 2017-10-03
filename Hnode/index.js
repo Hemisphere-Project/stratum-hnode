@@ -1,7 +1,8 @@
 var dgram = require('dgram');
 const EventEmitter = require('events');
 
-var PORT = 3737;          // Working UDP port
+var PORT_SERVER = 3737;          // Working UDP port
+var PORT_NODE = 3738;          // Working UDP port
 
 var TIME_TICK = 100;      // Watchdog timer ms
 var TIME_OFFLINE = 1000;  // Offline Time
@@ -174,7 +175,7 @@ class Client extends Worker {
     var that = this;
     if (this.udp == null) this.udp = dgram.createSocket('udp4');
     if (this.payload != null)
-      this.udp.send(this.payload, 0, this.payload.length, PORT, this.ip, function(err, bytes) {
+      this.udp.send(this.payload, 0, this.payload.length, PORT_NODE, this.ip, function(err, bytes) {
           if (err) throw err;
           that.emit('sent', this.payload);
       });
@@ -197,7 +198,7 @@ class Server extends Worker {
     this.clients = {};
 
     this.on('start', function() {
-      that.udpSocket.bind(PORT);
+      that.udpSocket.bind(PORT_SERVER);
     });
 
     this.on('stop', function() {
@@ -230,7 +231,7 @@ class Server extends Worker {
     // Message received from client
     this.udpSocket.on('message', function (message, remote) {
         var ip = remote.address;
-        var info = JSON.parse(message);
+        var info = JSON.parse(message.toString('UTF-8'));
 
         // Create client if new
         if (that.clients[ip] == null) {
