@@ -21,7 +21,8 @@ IPAddress server(192, 168, 0, 47);
 const int INFO_TIME = 300;
 
 EthernetUDP Udp;
-unsigned int udpPort = 3737;  // local port to listen on
+unsigned int udpPort_node = 3738;  // local port to listen on
+unsigned int udpPort_server = 3737;  // local port to speak to
 const int MTUu = 1472;  // Usable MTU (1500 - 20 IP - 8 UDP)
 byte incomingPacket[MTUu];  // buffer for incoming packets
 
@@ -31,7 +32,7 @@ byte incomingPacket[MTUu];  // buffer for incoming packets
 char  nodeName[] = "HNodeX";  // a reply string to send back
 unsigned long lastUpdate = 0;
 unsigned long lastData = 0;
-unsigned long now = 0; 
+unsigned long now = 0;
 int dataRate = 10;  // measure data rate
 int workTime = 10;  // measure data receiving and processing latency
 int infoTime = 0;   // measure info sending latency
@@ -51,7 +52,7 @@ void setup()
   FastLED.addLeds<NEOPIXEL, 4>(leds[2], NUM_LEDS_PER_STRIP);
   FastLED.addLeds<NEOPIXEL, 0>(leds[3], NUM_LEDS_PER_STRIP);
 
-  for(int x = 0; x < NUM_STRIPS; x++) 
+  for(int x = 0; x < NUM_STRIPS; x++)
     for(int i = 0; i < NUM_LEDS_PER_STRIP; i++)
       leds[x][i] = CRGB::Red;
   FastLED.show();
@@ -82,7 +83,7 @@ void setup()
       Ethernet.begin(mac, ip);
     }
   #else
-    Ethernet.begin(mac, ip);  
+    Ethernet.begin(mac, ip);
   #endif
   #if defined(DEBUG)
     Serial.print("HNode IP: ");
@@ -91,22 +92,22 @@ void setup()
 
 
   // UDP Receiver
-  Udp.begin(udpPort);
+  Udp.begin(udpPort_node);
   #if defined(DEBUG)
-    Serial.printf("Now listening at IP %s, UDP port %d\n", Ethernet.localIP().toString().c_str(), udpPort);
+    Serial.printf("Now listening at IP %s, UDP port %d\n", Ethernet.localIP().toString().c_str(), udpPort_node);
   #endif
 
 }
 
 
 void loop()
-{ 
+{
   // Store data receiving time
   now = millis();
-  
+
   int packetSize = Udp.parsePacket();
   if (packetSize)
-  {     
+  {
     #if defined(DEBUG_MSG)
        Serial.printf("Received %d bytes from %s\n", packetSize, Udp.remoteIP().toString().c_str());
     #endif
@@ -116,14 +117,14 @@ void loop()
     if (len > 0) incomingPacket[len] = 0;
 
     // UPDATE LEDs with data received
-    for(int x = 0; x < NUM_STRIPS; x++) 
-      for(int i = 0; i < NUM_LEDS_PER_STRIP; i++) 
-        for(int k = 0; k < 3; k++) 
+    for(int x = 0; x < NUM_STRIPS; x++)
+      for(int i = 0; i < NUM_LEDS_PER_STRIP; i++)
+        for(int k = 0; k < 3; k++)
           leds[x][i][k] = incomingPacket[x*NUM_LEDS_PER_STRIP+i*3+k];
 
     // LED Update
-    FastLED.show();  
-    
+    FastLED.show();
+
     #if defined(DEBUG_MSG)
       Serial.printf("UDP packet contents: %s\n", incomingPacket);
     #endif
@@ -136,7 +137,7 @@ void loop()
   now = millis();
   if (millis()-lastUpdate > INFO_TIME) {
     // make info
-    
+
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject& root = jsonBuffer.createObject();
     root["name"] = nodeName;
@@ -144,19 +145,17 @@ void loop()
     root["dataRate"] = dataRate;
     char message[200];
     root.printTo(message, sizeof(message));
-    
+
     // send INFO
-    Udp.beginPacket(server, udpPort);
+    Udp.beginPacket(server, udpPort_server);
     Udp.write(message);
     Udp.endPacket();
-    lastUpdate = millis(); 
-    
+    lastUpdate = millis();
+
     #if defined(DEBUG_MSG)
       Serial.printf("INFO packet sent: %s\n", message);
     #endif
-    
+
     infoTime = millis() - now;
   }
 }
-
-
