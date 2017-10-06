@@ -26,14 +26,17 @@ server.on('newnode', function(node) {
 server.start();
 
 // App example
-var myFPS = 25;
+var myFPS = 60;
 var count = 0;
 setInterval(function() {
-  server.setAll([255,0,0]);   // set every leds to red
+  // server.setAll([255,0,0]);   // set every leds to red
   server.blackout();          // switch off every leds
   count += 1;
   server.getAllNodes().forEach(function(node) {
-    node.randomize();                   // randomize all leds of the node
-    //node.setLed(Math.floor(count/90), (count%90), [255,255,255]);  // set strip 0, led 60 to white
+    //node.randomize();                   // randomize all leds of the node
+    node.setLed(0, count%90, [255,255,255]);  // set strip 0, led 60 to white
+    node.setLed(1, count%90, [255,255,255]);
+    node.setLed(2, count%90, [255,255,255]);
+    node.setLed(3, count%90, [255,255,255]);
   });
 }, Math.round(1000/myFPS));

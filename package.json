@@ -3,7 +3,9 @@
   "version": "0.1.1",
   "description": "stratum leds UDP server + client",
   "main": "Hnode/index.js",
-  "dependencies": {},
+  "dependencies": {
+    "nodemon": "^1.12.1"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "node demo.js"

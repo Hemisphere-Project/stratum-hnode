@@ -55,8 +55,8 @@ class Worker extends EventEmitter {
 
   setRate(tr) {
     this.timerate = tr;
-    log('FPS: '+ Math.round(100000/tr)/100);
-
+    //log('FPS: '+ Math.round(100000/tr)/100);
+    //this.timerate = 50;
   }
 
 }
@@ -98,10 +98,10 @@ class Client extends Worker {
   setAll(rgbs) {
     for(var strip = 0; strip < NSTRIPS_CLIENT; strip += 1) {
       for (var led = 0; led < NLEDS_STRIPS; led+=1) {
-        var key = (strip*NLEDS_STRIPS+led)*3;
-        this.payload[key+led] = rgbs[led][0];
-        this.payload[key+led+1] = rgbs[led][1];
-        this.payload[key+led+2] = rgbs[led][2];
+        var key = strip*NLEDS_STRIPS*3+led*3;
+        this.payload[key] = rgbs[led][0];
+        this.payload[key+1] = rgbs[led][1];
+        this.payload[key+2] = rgbs[led][2];
       }
     }
   }
@@ -124,7 +124,7 @@ class Client extends Worker {
   //
   setLed(strip, led, rgb) {
     var key = (strip*NLEDS_STRIPS+led)*3;
-    if (key >= NLEDS) return;
+    if (key >= NLEDS*3) return;
     this.payload[key] = rgb[0];
     this.payload[key+1] = rgb[1];
     this.payload[key+2] = rgb[2];

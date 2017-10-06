@@ -4,8 +4,6 @@ NodeJS Server / esp8266+W5500 Node
 You can find a basic usage in demo.js
 
 ### Install
-You need to copy Hnode directory in your project.
-
 `npm install --save hemisphere-project/stratum-hnode`
 
 
