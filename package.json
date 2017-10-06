@@ -1,0 +1,20 @@
+{
+  "name": "stratum-hnode",
+  "version": "0.1.0",
+  "description": "stratum leds UDP server + client",
+  "main": "Hnode/index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "node demo.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hemisphere-Project/STRATUM.git"
+  },
+  "author": "hemisphere-project (https://github.com/hemisphere-project)",
+  "bugs": {
+    "url": "https://github.com/Hemisphere-Project/STRATUM/issues"
+  },
+  "homepage": "https://github.com/Hemisphere-Project/STRATUM#readme"
+}
