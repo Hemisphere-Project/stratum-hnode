@@ -11,7 +11,7 @@ You need to copy Hnode directory in your project.
 
 ### Basic usage
 ```
-  var hnode = require('./Hnode');   // load library
+  var hnode = require('hnode');     // load library
   var server = new hnode.Server();  // instantiate a server
   server.start();                   // start the server
 ```

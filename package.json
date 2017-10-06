@@ -1,6 +1,6 @@
 {
-  "name": "stratum-hnode",
-  "version": "0.1.0",
+  "name": "hnode",
+  "version": "0.1.1",
   "description": "stratum leds UDP server + client",
   "main": "Hnode/index.js",
   "dependencies": {},
