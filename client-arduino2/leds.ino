@@ -51,6 +51,6 @@ void leds_checker() {
   led_set(1, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
   led_set(2, 0, 255, 0, 0);
   led_set(2, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
-  led_set(2, 0, 255, 0, 0);
-  led_set(2, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
+  led_set(3, 0, 255, 0, 0);
+  led_set(3, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
 }

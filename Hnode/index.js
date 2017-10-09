@@ -11,8 +11,6 @@ var NLEDS_STRIPS = 90;    // N leds per strips
 var NSTRIPS_CLIENT = 4;   // N strips per client
 
 var NLEDS = NLEDS_STRIPS * NSTRIPS_CLIENT;
-var TICK_OFFLINE = TIME_OFFLINE/TIME_TICK;
-var TICK_GONE = TIME_GONE/TIME_TICK;
 
 function log(msg) {
   console.log(msg);
@@ -150,15 +148,15 @@ class Client extends Worker {
     this.emit('received', info);
   }
 
-  check() {
+  check( ticksOffline, ticksGone) {
     this.noNews += 1;
 
     // state control
-    if (this.noNews == TICK_OFFLINE) {
+    if (this.noNews == ticksOffline) {
       this.infoCounter = 0;
       this.emit('offline');
     }
-    if (this.noNews == TICK_GONE) this.stop();
+    if (this.noNews == ticksGone) this.stop();
 
   }
 
@@ -198,7 +196,9 @@ class Server extends Worker {
     });
 
     this.on('tick', function() {
-      for (var name in that.clients) that.clients[name].check();
+      var TICK_OFFLINE = TIME_OFFLINE/that.timerate;
+      var TICK_GONE = TIME_GONE/that.timerate;
+      for (var name in that.clients) that.clients[name].check(TICK_OFFLINE, TICK_GONE);
     });
 
     this.configureUDP();

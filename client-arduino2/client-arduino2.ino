@@ -8,6 +8,8 @@
 //#define DEBUG_MSG 1     // Comment to disable Received message print
 
 byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
+char  nodeName[] = "HnodeX";  // a reply string to send back
+
 IPAddress ip(192, 168, 0, 210);       // fallback IP address (if no DHCP available)
 IPAddress server(192, 168, 0, 200);
 
@@ -22,7 +24,6 @@ byte incomingPacket[MTUu];  // buffer for incoming packets
 #define WIZ_RESET 3
 #define WIZ_CS 15
 
-char  nodeName[] = "HNodeX";  // a reply string to send back
 unsigned long lastUpdate = 0;
 unsigned long lastData = 0;
 unsigned long now = 0;

@@ -9,24 +9,24 @@ var server = new hnode.Server();
 server.on('newnode', function(node) {
 
   // Event: when the node start
-  node.on('start', function(node){ console.log('start '+this.ip) });
+  node.on('start', function(node){ console.log('start '+this.ip+' '+this.name) });
 
   // Event: when the node goes online
-  node.on('online', function(node){ console.log('online '+this.ip) });
+  node.on('online', function(node){ console.log('online '+this.ip+' '+this.name) });
 
   // Event: when the node goes offline
-  node.on('offline', function(node){ console.log('offline '+this.ip) });
+  node.on('offline', function(node){ console.log('offline '+this.ip+' '+this.name) });
 
   // Event: when the node stop
-  node.on('stop', function(node){ console.log('stop '+this.ip) });
+  node.on('stop', function(node){ console.log('stop '+this.ip+' '+this.name) });
 
 });
 
 // Set up a custom animation
 var count = 0;
-function animate(server) {
-  server.blackout();          // switch off every leds
-  server.getAllNodes().forEach(function(node) {
+function animate() {
+  this.blackout();          // switch off every leds
+  this.getAllNodes().forEach(function(node) {
     node.setLed(0, count%90, [255,255,255]);
     node.setLed(1, count%90, [255,255,255]);
     node.setLed(2, count%90, [255,255,255]);
@@ -38,8 +38,8 @@ function animate(server) {
 // Bind animation to Server sequencer
 server.on('tick', animate);
 
-// Set Server sequencer timing @ 60 FPS
-server.setRate(1000/60);
+// Set Server sequencer timing @ 50 FPS
+server.setRate(20);
 
 // Start server
 server.start();
