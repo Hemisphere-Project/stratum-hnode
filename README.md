@@ -70,3 +70,8 @@ You can find a basic usage in demo.js
 
   `.on('stop', function(node){ ... }) `  
        triggered when a node is stopped
+       
+       
+## TODO:
+- Server presence broadcast beacon + Arduino auto-catch server IP
+- Arduino client MAC address, and derivative name
