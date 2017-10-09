@@ -11,7 +11,7 @@ Adafruit_NeoPixel strip3 = Adafruit_NeoPixel(NUM_LEDS_PER_STRIP, 2, NEO_GRB + NE
 void leds_init() {
   strip0.begin();
   strip1.begin();
-  strip2.begin(); 
+  strip2.begin();
   strip3.begin();
 }
 
@@ -37,3 +37,20 @@ void leds_set(byte payload[]) {
       }
 }
 
+void leds_blackout() {
+  for(int x = 0; x < NUM_STRIPS; x++)
+      for(int i = 0; i < NUM_LEDS_PER_STRIP; i++)
+        led_set(x, i, 0, 0, 0);
+}
+
+void leds_checker() {
+  leds_blackout();
+  led_set(0, 0, 255, 0, 0);
+  led_set(0, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
+  led_set(1, 0, 255, 0, 0);
+  led_set(1, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
+  led_set(2, 0, 255, 0, 0);
+  led_set(2, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
+  led_set(2, 0, 255, 0, 0);
+  led_set(2, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
+}

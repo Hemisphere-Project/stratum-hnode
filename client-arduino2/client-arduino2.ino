@@ -3,13 +3,13 @@
 #include <Ethernet2.h>
 #include <EthernetUdp2.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
 
-//#define USE_DHCP 1 // Comment to force static IP
+#define USE_DHCP 1 // Comment to force static IP
 //#define DEBUG 1     // Comment to disable Serial
 //#define DEBUG_MSG 1     // Comment to disable Received message print
 
 byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-IPAddress ip(192, 168, 0, 200);       // fallback IP address (if no DHCP available)
-IPAddress server(192, 168, 0, 47);
+IPAddress ip(192, 168, 0, 210);       // fallback IP address (if no DHCP available)
+IPAddress server(192, 168, 0, 200);
 
 const int INFO_TIME = 300;
 
@@ -41,6 +41,8 @@ void setup()
 
   // LEDS
   leds_init();
+  leds_checker();
+  leds_show();
 
   // RESET ethernet
   #if defined(WIZ_RESET)
