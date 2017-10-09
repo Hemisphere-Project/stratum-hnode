@@ -54,7 +54,7 @@ class Worker extends EventEmitter {
   }
 
   setRate(tr) {
-    this.timerate = tr;
+    this.timerate = Math.round(tr);
     //log('FPS: '+ Math.round(100000/tr)/100);
     //this.timerate = 50;
   }
@@ -98,7 +98,7 @@ class Client extends Worker {
   setAll(rgbs) {
     for (var strip = 0; strip <rgbs.length; strip += 1)
       this.setStrip(strip, rgbs[strip]);
-      	
+
   }
 
   //
@@ -135,13 +135,13 @@ class Client extends Worker {
 
     // adjust refresh rate
     if (this.timerate < info["processing"]) // Processing takes more time => slow down
-      this.setRate(this.timerate + Math.round(info["processing"]*0.3));   // Growing 30%
+      this.setRate(this.timerate + info["processing"]*0.3);   // Growing 30%
 
     else if (info["dataRate"] > info["processing"]+10) // 10ms for data transmission is too much => speed up
-      this.setRate(Math.max(10,Math.round(info["dataRate"]*0.6)));     // Reducing 30%
+      this.setRate(Math.max(10, info["dataRate"]*0.6));     // Reducing 30%
 
     else if (this.timerate < info["dataRate"]) // Timerate is going too fast, dataRate doesn't follow => slow down
-      this.setRate(this.timerate + Math.round(info["dataRate"]*0.3));     // Growing 30%
+      this.setRate(this.timerate + info["dataRate"]*0.3);     // Growing 30%
 
     // simplified auto-rate based on processing time + 5ms
     //this.setRate(info["processing"]+5);

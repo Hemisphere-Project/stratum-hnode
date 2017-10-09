@@ -26,7 +26,7 @@ You can find a basic usage in demo.js
       return an array with all known Nodes
 
   `.setAll( rgb )`  
-      apply rgb array to every leds, rgb = [r,g,b]
+      apply one color (rgb array) to every leds, rgb = [r,g,b]
 
   `.blackout()`  
       switch off every leds
@@ -35,15 +35,21 @@ You can find a basic usage in demo.js
   `.on('newnode', function(node){ ... })`   
        triggered when a new Node is discovered
 
+  `.on('tick', function(node){ ... })`
+       server ticker, can be use as main sequencer
+
 #### Node methods:
   `.setLed( strip, led, rgb )`   
        apply rgb array to a specific led, rgb = [r, g, b]
+       array[3]
 
   `.setStrip( led, rgbs )`   
        apply rgbs array of array to a strip, rgbs = [ [r, g, b],  [r, g, b], ... ]
+       array[NUM_LEDS_PER_STRIP][3]
 
   `.setAll( rgbs )`   
        apply a whole set of 4 strips, rgbs = [ [ [r, g, b],  [r, g, b], ... ], ... ]
+       array[NSTRIPS_PER_CLIENTS][NUM_LEDS_PER_STRIP][3]
 
   `.randomize()`   
        randomize all values of the node's leds
