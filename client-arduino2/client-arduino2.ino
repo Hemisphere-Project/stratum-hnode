@@ -8,9 +8,10 @@
 //#define DEBUG_MSG 1     // Comment to disable Received message print
 
 byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-char  nodeName[] = "HnodeX";  // a reply string to send back
+char  nodeName[] = "HnodeY";  // a reply string to send back
 
 IPAddress ip(192, 168, 0, 210);       // fallback IP address (if no DHCP available)
+//IPAddress server(192, 168, 0, 32);
 IPAddress server(192, 168, 0, 200);
 
 const int INFO_TIME = 300;

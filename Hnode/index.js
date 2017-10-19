@@ -165,8 +165,14 @@ class Client extends Worker {
     if (this.udp == null) this.udp = dgram.createSocket('udp4');
     if (this.payload != null)
       this.udp.send(this.payload, 0, this.payload.length, this.port, this.ip, function(err, bytes) {
-          if (err) throw err;
-          that.emit('sent', this.payload);
+          if (err) {
+            if (err.code == 'ENETUNREACH' || err.code == 'EADDRNOTAVAIL') {
+              console.log('\nWarning: the server lost connection to the network');
+              that.stop();
+            }
+            else throw err;
+          }
+          else that.emit('sent', this.payload);
       });
   }
 
