@@ -104,7 +104,7 @@ class Client extends Worker {
   //
   setStrip(strip, rgbs) {
     for (var led = 0; led < rgbs.length; led += 1) {
-      this.setLed(strip, led, rgbs[i])
+      this.setLed(strip, led, rgbs[led])
     }
   }
 
