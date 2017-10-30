@@ -20,6 +20,9 @@ server.on('newnode', function(node) {
   // Event: when the node stop
   node.on('stop', function(node){ console.log('stop '+this.ip+' '+this.name) });
 
+  // Event: when the node stop
+  node.on('fps', function(fps){ console.log('FPS '+this.name+' '+fps) });
+
 });
 
 // Set up a custom animation

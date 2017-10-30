@@ -53,6 +53,7 @@ class Worker extends EventEmitter {
 
   setRate(tr) {
     this.timerate = Math.round(tr);
+    this.emit('fps', Math.round(100000/tr)/100);
     //log('FPS: '+ Math.round(100000/tr)/100);
     //this.timerate = 50;
   }
