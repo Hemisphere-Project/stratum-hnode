@@ -23,6 +23,9 @@ server.on('newnode', function(node) {
   // Event: when the node stop
   node.on('fps', function(fps){ console.log('FPS '+this.name+' '+fps) });
 
+  // Manual locked rate
+  node.lockRate(1000/40);
+
 });
 
 // Set up a custom animation
@@ -42,7 +45,7 @@ function animate() {
 server.on('tick', animate);
 
 // Set Server sequencer timing @ 50 FPS
-server.setRate(20);
+server.setRate(1000/60);
 
 // Start server
 server.start();

@@ -23,7 +23,7 @@ class Worker extends EventEmitter {
     this.isRunning  = false;
     this.timer      = null;
     this.timerate   = TIME_TICK;
-
+    this.allowRateChange = true;
   }
 
   start() {
@@ -52,10 +52,21 @@ class Worker extends EventEmitter {
   }
 
   setRate(tr) {
+    if (!this.allowRateChange) return;
     this.timerate = Math.round(tr);
     this.emit('fps', Math.round(100000/tr)/100);
     //log('FPS: '+ Math.round(100000/tr)/100);
     //this.timerate = 50;
+  }
+
+  lockRate(tr) {
+    this.allowRateChange = true;
+    this.setRate(tr);
+    this.allowRateChange = false;
+  }
+
+  unlockRate() {
+    this.allowRateChange = true;
   }
 
 }
@@ -120,7 +131,9 @@ class Client extends Worker {
     this.payload[key + 2] = rgb[2];
   }
 
-  update(info) {
+  update(ip, info) {
+    // re-store ip
+    this.ip = ip;
 
     // update received: should be running
     if (!this.isRunning) this.start();
@@ -136,8 +149,8 @@ class Client extends Worker {
     if (this.timerate < info["processing"]) // Processing takes more time => slow down
       this.setRate(this.timerate + info["processing"]*0.3);   // Growing 30%
 
-    else if (info["dataRate"] > info["processing"]+10) // 10ms for data transmission is too much => speed up
-      this.setRate(Math.max(10, info["dataRate"]*0.6));     // Reducing 30%
+    else if (info["dataRate"] > info["processing"]+20) // 10ms for data transmission is too much => speed up
+      this.setRate(Math.max(20, info["dataRate"]*0.6));     // Reducing 30%
 
     else if (this.timerate < info["dataRate"]) // Timerate is going too fast, dataRate doesn't follow => slow down
       this.setRate(this.timerate + info["dataRate"]*0.3);     // Growing 30%
@@ -203,8 +216,8 @@ class Server extends Worker {
     });
 
     this.on('tick', function() {
-      var TICK_OFFLINE = TIME_OFFLINE/that.timerate;
-      var TICK_GONE = TIME_GONE/that.timerate;
+      var TICK_OFFLINE = Math.round(TIME_OFFLINE/that.timerate);
+      var TICK_GONE = Math.round(TIME_GONE/that.timerate);
       for (var name in that.clients) that.clients[name].check(TICK_OFFLINE, TICK_GONE);
     });
 
@@ -239,7 +252,7 @@ class Server extends Worker {
         }
 
         // Update client
-        that.clients[name].update(info);
+        that.clients[name].update(ip, info);
     });
   }
 

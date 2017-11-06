@@ -6,7 +6,7 @@
 #define WIZ_CS 15
 
 IPAddress server(192, 168, 0, 200);
-IPAddress ip(192, 168, 0, nodeNumber);       // fallback IP address (if no DHCP available)
+IPAddress ip(192, 168, 0, 210);       // fallback IP address (if no DHCP available)
 
 EthernetUDP Udp;
 unsigned int udpPort_node = 3738;  // local port to listen on
@@ -63,8 +63,6 @@ bool eth_read(byte *incomingPacket, int MTUu) {
 
     // receive incoming UDP packets
     int len = Udp.read(incomingPacket, MTUu);
-    if (len < 0) len = 0;
-    if (len >= MTUu) len = MTUu-1;
     if (len > 0) incomingPacket[len] = 0;
     
     return true;

@@ -53,7 +53,7 @@ void eth_start() {
   #endif
 }
 
-bool eth_read(byte *incomingPacket, int MTUu) {
+bool eth_read(unsigned char* incomingPacket) {
   int packetSize = Udp.parsePacket();
   if (packetSize)
   {
@@ -63,16 +63,13 @@ bool eth_read(byte *incomingPacket, int MTUu) {
 
     // receive incoming UDP packets
     int len = Udp.read(incomingPacket, MTUu);
-    if (len < 0) len = 0;
-    if (len >= MTUu) len = MTUu-1;
-    if (len > 0) incomingPacket[len] = 0;
     
     return true;
   }
   return false;
 }
 
-void eth_send(char message[200]) {
+void eth_send(char message[600]) {
   Udp.beginPacket(server, udpPort_server);
   Udp.write(message);
   Udp.endPacket();
