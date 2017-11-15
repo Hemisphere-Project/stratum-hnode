@@ -24,17 +24,28 @@ server.on('newnode', function(node) {
   node.on('fps', function(fps){ console.log('FPS '+this.name+' '+fps) });
 
   // Manual locked rate
-  node.lockRate(1000/40);
+  node.lockRate(1000/30);
 
 });
 
+// MODE  0: windows // 1: all // 2: windows slide
+MODE = 1
+
+// TIRET STYLE
+SPEED = 0.7
+
+// FULL STYLE
+STROBE = 0
+
+
+// WIN STYLE
 var patternSize = 5
 var averageLight = 0.5
 
 function winStick() {
   this.wins = []
   for (var k=0; k<90/patternSize; k++) this.wins.push(new window())
-
+  this.offset = 0
 }
 
 function window() {
@@ -44,21 +55,21 @@ function window() {
 
 var GROUPS = []
 GROUPS[0] = [
-              {'name': 'Hnode-24', 'basecolor': [255,0,0], 'windows': []}, 
-              {'name': 'Hnode-16', 'basecolor': [255,0,0], 'windows': []},
+              {'name': 'Hnode-24', 'basecolor': [120,120,120], 'windows': []}, 
+              {'name': 'Hnode-16', 'basecolor': [120,120,120], 'windows': []},
             ]
 
 GROUPS[1] = [
-              {'name': 'Hnode-12', 'basecolor': [255,0,0], 'windows': []},
-              {'name': 'Hnode-13', 'basecolor': [255,0,0], 'windows': []},
-              {'name': 'Hnode-25', 'basecolor': [255,0,0], 'windows': []},
+              {'name': 'Hnode-12', 'basecolor': [120,120,120], 'windows': []},
+              {'name': 'Hnode-13', 'basecolor': [120,120,120], 'windows': []},
+              {'name': 'Hnode-25', 'basecolor': [120,120,120], 'windows': []},
 ]
 GROUPS[2] = [
-              {'name': 'Hnode-19', 'basecolor': [255,0,0], 'windows': []},
-              {'name': 'Hnode-23', 'basecolor': [255,0,0], 'windows': []},
+              {'name': 'Hnode-19', 'basecolor': [120,120,120], 'windows': []},
+              {'name': 'Hnode-23', 'basecolor': [120,120,120], 'windows': []},
 ]
 GROUPS[3] = [
-              {'name': 'Hnode-15', 'basecolor': [255,0,0], 'windows': []},
+              {'name': 'Hnode-15', 'basecolor': [120,120,120], 'windows': []},
 ]
 
 
@@ -101,6 +112,21 @@ udpserver.on('message', (msg, rinfo) => {
   msg = String(msg)
   msg = msg.replace(/,/g, '');
   msg = msg.split(' ')
+
+  if (msg[0] == 'mode') {
+    MODE = parseInt(msg[1])
+    return
+  }
+
+  if (msg[0] == 'speed') {
+    SPEED = parseInt(msg[1])/10
+    return
+  }
+
+  if (msg[0] == 'strobe') {
+    STROBE = parseInt(msg[1])
+    return
+  }
 
   var group = msg[0]
   var master = msg[1]
@@ -153,24 +179,59 @@ function buildings() {
 }
 
 function show() {
-  for (var gr=0; gr<GROUPS.length; gr++)
-    for (var nn=0; nn<GROUPS[gr].length; nn++) {
-      node = server.getNodeByName(GROUPS[gr][nn]['name']);
-      colors = GROUPS[gr][nn]['basecolor']
-      if (node) {
-        for (var stick=0; stick<4; stick++)
-          for (var wn=0; wn<GROUPS[gr][nn]['windows'][stick].wins.length; wn++)
-              for (var i=0; i<patternSize; i++) {
-                if (i >= 2 && GROUPS[gr][nn]['windows'][stick].wins[wn].isOn) c = colors
-                else c = [0,0,0]
-                node.setLed(stick, wn*patternSize+i, c);
-              }
-      }
-    }
-    count += 1
-    // if (count%4 == 0) 
-    buildings()
 
+  if (MODE == 0) {
+    for (var gr=0; gr<GROUPS.length; gr++)
+      for (var nn=0; nn<GROUPS[gr].length; nn++) {
+        node = server.getNodeByName(GROUPS[gr][nn]['name']);
+        colors = GROUPS[gr][nn]['basecolor']
+        if (node) {
+          for (var stick=0; stick<4; stick++)
+            for (var wn=0; wn<GROUPS[gr][nn]['windows'][stick].wins.length; wn++)
+                for (var i=0; i<patternSize; i++) {
+                  if (i >= 2 && GROUPS[gr][nn]['windows'][stick].wins[wn].isOn) c = colors
+                  else c = [0,0,0]
+                  node.setLed(stick, wn*patternSize+i, c);
+                }
+        }
+      }
+      // if (count%4 == 0)
+      buildings()
+  }
+  else if (MODE == 1) {
+    for (var gr=0; gr<GROUPS.length; gr++)
+      for (var nn=0; nn<GROUPS[gr].length; nn++) {
+        node = server.getNodeByName(GROUPS[gr][nn]['name']);
+        colors = GROUPS[gr][nn]['basecolor']
+        if (node)
+          for (var s=0; s<4; s++) {
+            strobe = STROBE*Math.random()
+            for (var k=0; k<90; k++) {
+              var onOff =  (STROBE == 0) || (count%strobe < strobe/2)
+              // if ((s*2+count)%5 == 0) onOff = false
+              if (!onOff) c = [0,0,0]
+              else c = colors
+              node.setLed(s, k, c);
+            }
+          }
+      }
+  }
+  else if (MODE == 2) {
+    for (var gr=0; gr<GROUPS.length; gr++)
+      for (var nn=0; nn<GROUPS[gr].length; nn++) {
+        node = server.getNodeByName(GROUPS[gr][nn]['name']);
+        colors = GROUPS[gr][nn]['basecolor']
+        if (node)
+          for (var k=0; k<90; k++)
+            for (var s=0; s<4; s++) {
+              var onOff = ((k-(count*SPEED)%5)%5) < 2
+              if (onOff) c = [0,0,0]
+              else c = colors
+              node.setLed(s, k, c);
+            }
+      }
+  }
+  count += 1
 }
 
 // Bind animation to Server sequencer
