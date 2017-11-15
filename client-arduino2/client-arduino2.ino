@@ -1,13 +1,13 @@
 #include <ArduinoJson.h>
 
 #define USE_DHCP 1 // Comment to force static IP
-//#define DEBUG 1     // Comment to disable Serial
-//#define DEBUG_MSG 1     // Comment to disable Received message print
+#define DEBUG 1     // Comment to disable Serial
+#define DEBUG_MSG 1     // Comment to disable Received message print
 
 //
 //
 //
-byte nodeNumber = 25;
+byte nodeNumber = 21;
 //
 // 
 //

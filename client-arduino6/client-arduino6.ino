@@ -8,8 +8,8 @@
 //
 //
 //
-
-byte nodeNumber = 21;                                             // todo: replace with ESP.getChipId() ??
+const int VERSION = 6;
+byte nodeNumber = 25;                                             // todo: replace with ESP.getChipId() ??
 
 byte mac[]    = {  0x0E, 0x00, 0x00, 0x00, 0x00, nodeNumber };    // todo: replace with ESP.getChipId() - (last 3 bytes) ??
 IPAddress ip(192, 168, 0, nodeNumber+10);                            // Static IP
@@ -24,7 +24,7 @@ const bool useWIFI = true;
 
 unsigned int udpPort_node = 3738;  // local port to listen on
 unsigned int udpPort_server = 3737;  // local port to speak to
-IPAddress server(192, 168, 0, 200);
+IPAddress server(192, 168, 6, 3);
 char nodeName[8];
 
 const int MTUu = 1472;  // Usable MTU (1500 - 20 IP - 8 U,DP)
@@ -109,6 +109,7 @@ void loop()
     root["processing"] = workTime + infoTime;
     root["dataRate"] = dataRate;
     root["port"] = wifi_port();
+    root["version"] = VERSION;
     char message[600];
     root.printTo(message, sizeof(message));
 
