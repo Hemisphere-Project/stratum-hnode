@@ -3,31 +3,43 @@
 
 //#define DEBUG 1     // Comment to disable Serial
 //#define DEBUG_MSG 1     // Comment to disable Received message print
-//#define USE_DHCP 1 // Comment to force static IP
+//#define USE_DHCP_ETH 1 // Comment to force static IP
 
 //
+// REPLACE NODE ID (comment once it has been done !)
 //
+#define NODE_NUMBER 25
+
+
+//
+// VERSION 
 //
 const int VERSION = 6;
-byte nodeNumber = 25;                                             // todo: replace with ESP.getChipId() ??
+/*
+ * VERSION 6:
+ * Push Node Number into EEPROM to avoid reflashing Number each time !
+ * Also Wifi connection is not blocking when using ETH as main pipeline
+ * 
+ */
 
-byte mac[]    = {  0x0E, 0x00, 0x00, 0x00, 0x00, nodeNumber };    // todo: replace with ESP.getChipId() - (last 3 bytes) ??
-IPAddress ip(192, 168, 0, nodeNumber+10);                            // Static IP
-
+//
+// WIFI
+//
 const char* ssid = "stratum";
 const char* password = "9000leds";
-const bool useWIFI = true;
+const bool useWIFI = false;
 
 //
-// 
+// NETWORK 
 //
+IPAddress server(192, 168, 0, 99);
+unsigned int udpPort_node = 3738;  // Node port to listen on
+unsigned int udpPort_server = 3737;  // Server port to speak to
 
-unsigned int udpPort_node = 3738;  // local port to listen on
-unsigned int udpPort_server = 3737;  // local port to speak to
-IPAddress server(192, 168, 6, 3);
+byte nodeID;
 char nodeName[8];
 
-const int MTUu = 1472;  // Usable MTU (1500 - 20 IP - 8 U,DP)
+const int MTUu = 1472;  // Usable MTU (1500 - 20 IP - 8 UDP)
 unsigned char incomingPacket[MTUu];  // buffer for incoming packets
 
 const int INFO_TIME = 500;
@@ -42,14 +54,21 @@ unsigned long lastData = 0;
 
 void setup()
 {
+  // NODE ID
+  #ifdef NODE_NUMBER
+    eeprom_setID((byte)NODE_NUMBER);
+  #endif
+  nodeID = eeprom_getID();
+  
   // NAME
-  sprintf(nodeName, "%s%02i","Hnode-", nodeNumber);
+  sprintf(nodeName, "%s%02i","Hnode-", nodeID);
   
   // SERIAL
-  #if defined(DEBUG)
+  #ifdef DEBUG
     Serial.begin(115200);
     delay(100);
-    Serial.println("\nHello!");
+    Serial.println("\nHello!\n");
+    Serial.println("Node: "+nodeName);
   #endif
 
   // LEDS
@@ -82,11 +101,11 @@ void loop()
   ota_loop();
 
   // Check if DATA received
-  bool net_read;
-  if (useWIFI) net_read =  wifi_read(incomingPacket);
-  else  net_read =  eth_read(incomingPacket);
+  bool new_data;
+  if (useWIFI) new_data =  wifi_read(incomingPacket);
+  else  new_data =  eth_read(incomingPacket);
   
-  if ( net_read ) {
+  if ( new_data ) {
 
     // UPDATE LEDs with data received
     leds_set( incomingPacket );

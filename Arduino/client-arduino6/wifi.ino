@@ -4,26 +4,26 @@
 WiFiUDP WUdp;
 
 bool wifi_init() {
- // Enable wifi and connect
- WiFi.mode(WIFI_STA);
+  // Enable wifi and connect
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
   WiFi.begin(ssid, password);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    if (useWIFI) ESP.restart();
-    return false;
+
+  // If WIFI is the main channel, wait for connection to succeed or restart
+  if (useWIFI) {
+    if (WiFi.waitForConnectResult() != WL_CONNECTED)  ESP.restart();
+    else return true;
   }
-  return true;
-  //while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    //Serial.println("Connection Failed! Rebooting...");
-    //ESP.restart();
-  //}
+
+  return false;
 }
 
 void wifi_start() {
   // UDP Receiver
   WUdp.begin(udpPort_node);
-  #if defined(DEBUG)
-    Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), udpPort_node);
-  #endif
+#if defined(DEBUG)
+  Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), udpPort_node);
+#endif
 }
 
 
@@ -31,13 +31,13 @@ bool wifi_read(unsigned char* incomingPacket) {
   int packetSize = WUdp.parsePacket();
   if (packetSize)
   {
-    #if defined(DEBUG_MSG)
-       Serial.printf("Received %d bytes from %s\n", packetSize, Udp.remoteIP().toString().c_str());
-    #endif
+#if defined(DEBUG_MSG)
+    Serial.printf("Received %d bytes from %s\n", packetSize, Udp.remoteIP().toString().c_str());
+#endif
 
     // receive incoming UDP packets
     int len = WUdp.read(incomingPacket, MTUu);
-    
+
     return true;
   }
   return false;

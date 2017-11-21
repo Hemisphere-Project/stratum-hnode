@@ -8,6 +8,10 @@
 EthernetUDP Udp;
 
 void eth_start() {
+
+  IPAddress ip(192, 168, 0, nodeID+100);                             // Static IP
+  byte mac[]    = {  0x0E, 0x00, 0x00, 0x00, 0x00, nodeID };        // Eth MAC
+  
   // RESET ethernet
   #if defined(WIZ_RESET)
     #if defined(DEBUG)
@@ -26,7 +30,7 @@ void eth_start() {
 
   // ETH start
   Ethernet.init(WIZ_CS);
-  #if defined(USE_DHCP)
+  #if defined(USE_DHCP_ETH)
     if (Ethernet.begin(mac) == 0) {
       #if defined(DEBUG)
         Serial.println("DHCP failed... fallback to static");
