@@ -28,8 +28,14 @@ server.on('newnode', function(node) {
 
 });
 
+
+BASE_COLOR_RED = [100,0,0]
+BASE_COLOR_YEL = [80,50,1]
+BASE_COLOR_BLU = [0,0,100]
+BASE_COLOR_WHT = [80,80,80]
+
 // MODE  0: windows // 1: all // 2: windows slide
-MODE = 1
+MODE = 0
 
 // TIRET STYLE
 SPEED = 0.7
@@ -55,21 +61,21 @@ function window() {
 
 var GROUPS = []
 GROUPS[0] = [
-              {'name': 'Hnode-24', 'basecolor': [120,120,120], 'windows': []}, 
-              {'name': 'Hnode-16', 'basecolor': [120,120,120], 'windows': []},
+              {'name': 'Hnode-24', 'basecolor': BASE_COLOR_YEL, 'windows': []}, 
+              {'name': 'Hnode-16', 'basecolor': BASE_COLOR_RED, 'windows': []},
             ]
 
 GROUPS[1] = [
-              {'name': 'Hnode-12', 'basecolor': [120,120,120], 'windows': []},
-              {'name': 'Hnode-13', 'basecolor': [120,120,120], 'windows': []},
-              {'name': 'Hnode-25', 'basecolor': [120,120,120], 'windows': []},
+              {'name': 'Hnode-25', 'basecolor': BASE_COLOR_BLU, 'windows': []},
+              {'name': 'Hnode-12', 'basecolor': BASE_COLOR_BLU, 'windows': []},
+              {'name': 'Hnode-13', 'basecolor': BASE_COLOR_RED, 'windows': []},
 ]
 GROUPS[2] = [
-              {'name': 'Hnode-19', 'basecolor': [120,120,120], 'windows': []},
-              {'name': 'Hnode-23', 'basecolor': [120,120,120], 'windows': []},
+              {'name': 'Hnode-19', 'basecolor': BASE_COLOR_YEL, 'windows': []},
+              {'name': 'Hnode-23', 'basecolor': BASE_COLOR_YEL, 'windows': []},
 ]
 GROUPS[3] = [
-              {'name': 'Hnode-15', 'basecolor': [120,120,120], 'windows': []},
+              {'name': 'Hnode-15', 'basecolor': BASE_COLOR_RED, 'windows': []},
 ]
 
 
