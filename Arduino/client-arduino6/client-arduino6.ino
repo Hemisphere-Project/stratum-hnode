@@ -8,7 +8,7 @@
 //
 // REPLACE NODE ID (comment once it has been done !)
 //
-#define NODE_NUMBER 25
+//#define NODE_NUMBER 99
 
 
 //
@@ -36,7 +36,6 @@ IPAddress server(192, 168, 0, 99);
 unsigned int udpPort_node = 3738;  // Node port to listen on
 unsigned int udpPort_server = 3737;  // Server port to speak to
 
-byte nodeID;
 char nodeName[8];
 
 const int MTUu = 1472;  // Usable MTU (1500 - 20 IP - 8 UDP)
@@ -58,17 +57,16 @@ void setup()
   #ifdef NODE_NUMBER
     eeprom_setID((byte)NODE_NUMBER);
   #endif
-  nodeID = eeprom_getID();
   
   // NAME
-  sprintf(nodeName, "%s%02i","Hnode-", nodeID);
+  sprintf(nodeName, "%s%02i","Hnode-", eeprom_getID());
   
   // SERIAL
   #ifdef DEBUG
     Serial.begin(115200);
     delay(100);
     Serial.println("\nHello!\n");
-    Serial.println("Node: "+nodeName);
+    Serial.println(nodeName);
   #endif
 
   // LEDS
