@@ -9,8 +9,8 @@ EthernetUDP Udp;
 
 void eth_start() {
 
-  IPAddress ip(192, 168, 0, nodeID+100);                             // Static IP
-  byte mac[]    = {  0x0E, 0x00, 0x00, 0x00, 0x00, nodeID };        // Eth MAC
+  IPAddress ip(192, 168, 0, eeprom_getID()+100);                             // Static IP
+  byte mac[]    = {  0x0E, 0x00, 0x00, 0x00, 0x00, eeprom_getID() };        // Eth MAC
   
   // RESET ethernet
   #if defined(WIZ_RESET)

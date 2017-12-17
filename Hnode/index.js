@@ -76,9 +76,11 @@ class Client extends Worker {
     super();
     var that = this;
 
-    this.ip = ip;
     this.name = info["name"];
+
+    this.ip = ip;
     this.port = info["port"];
+
     this.noNews = 0;
     this.udp = null;
     this.infoCounter = 0;
@@ -132,8 +134,11 @@ class Client extends Worker {
   }
 
   update(ip, info) {
-    // re-store ip
-    this.ip = ip;
+
+    // re-store info
+    this.ip = ip
+    this.port = info["port"]
+    this.version = info["version"]
 
     // update received: should be running
     if (!this.isRunning) this.start();
@@ -249,6 +254,7 @@ class Server extends Worker {
         if (that.clients[name] == null) {
           that.clients[name] = new Client(ip, info);
           that.emit('newnode', that.clients[name]);
+          // console.log(ip, info)
         }
 
         // Update client
