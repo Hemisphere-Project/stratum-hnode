@@ -86,6 +86,8 @@ class Client extends Worker {
     this.infoCounter = 0;
     this.payload = Buffer.alloc(NLEDS*3, 0);
 
+    this.setRate(1000/70);
+
     // send payload at every ticks
     this.on('tick', this.send);
 
@@ -151,14 +153,14 @@ class Client extends Worker {
     this.noNews = 0;
 
     // adjust refresh rate
-    if (this.timerate < info["processing"]) // Processing takes more time => slow down
-      this.setRate(this.timerate + info["processing"]*0.3);   // Growing 30%
-
-    else if (info["dataRate"] > info["processing"]+20) // 10ms for data transmission is too much => speed up
-      this.setRate(Math.max(20, info["dataRate"]*0.6));     // Reducing 30%
-
-    else if (this.timerate < info["dataRate"]) // Timerate is going too fast, dataRate doesn't follow => slow down
-      this.setRate(this.timerate + info["dataRate"]*0.3);     // Growing 30%
+    // if (this.timerate < info["processing"]) // Processing takes more time => slow down
+    //   this.setRate(this.timerate + info["processing"]*0.3);   // Growing 30%
+    //
+    // else if (info["dataRate"] > info["processing"]+20) // 10ms for data transmission is too much => speed up
+    //   this.setRate(Math.max(20, info["dataRate"]*0.6));     // Reducing 30%
+    //
+    // else if (this.timerate < info["dataRate"]) // Timerate is going too fast, dataRate doesn't follow => slow down
+    //   this.setRate(this.timerate + info["dataRate"]*0.3);     // Growing 30%
 
     // simplified auto-rate based on processing time + 5ms
     //this.setRate(info["processing"]+5);
@@ -247,7 +249,13 @@ class Server extends Worker {
     // Message received from client
     this.udpSocket.on('message', function (message, remote) {
         var ip = remote.address;
-        var info = JSON.parse(message.toString('UTF-8'));
+        //var info = JSON.parse(message.toString('UTF-8'));
+        var msg = message.toString('UTF-8').split('//')
+        var info = {
+          'name': msg[0],
+          'port': msg[1],
+          'version': msg[2]
+        }
         var name = info['name'];
 
         // Create client if new

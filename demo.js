@@ -32,7 +32,7 @@ server.on('newnode', function(node) {
   node.on('fps', function(fps){ console.log('FPS '+this.name+' '+fps) });
 
   // Manual locked rate
-  node.lockRate(1000/30);
+  // node.lockRate(0.0001);
 
 });
 
@@ -41,12 +41,22 @@ var count = 0;
 function animate() {
   this.blackout();          // switch off every leds
   this.getAllNodes().forEach(function(node) {
-   	color = [255,255,255]
+    color = [5,5,5]
+   // 	color = [255,255,255]
    	//if ((count % 90) == 10) color = [255,0,0]
-    node.setLed(0, count%90, color);
-    node.setLed(1, count%90, color);
-    node.setLed(2, count%90, color);
-    node.setLed(3, count%90, color);
+
+    if (count%100 > 10)
+    for (var k=0; k<90; k++) {
+    node.setLed(0, k, color);
+    node.setLed(1, k, color);
+    node.setLed(2, k, color);
+      node.setLed(3, k, color);
+    }
+
+    // node.setLed(0, count%90, color);
+    // node.setLed(1, count%90, color);
+    // node.setLed(2, count%90, color);
+    // node.setLed(3, count%90, color);
 
 
 
@@ -58,7 +68,7 @@ function animate() {
 server.on('tick', animate);
 
 // Set Server sequencer timing @ 50 FPS
-server.setRate(1000/30);
+server.setRate(1000/100);
 
 // Start server
 server.start();
