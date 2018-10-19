@@ -1,13 +1,15 @@
 #include <Ethernet2.h>
 
-#define DEBUG 1     // Comment to disable Serial
+//#define DEBUG 1     // Comment to disable Serial
 //#define DEBUG_MSG 1     // Comment to disable Received message print
 //#define USE_DHCP_ETH 1 // Comment to force static IP
 
 //
 // REPLACE NODE ID (comment once it has been done !)
+// STRATUM: 1 -> 30
+// RYTHMUS: 101 -> 113
 //
-//#define NODE_NUMBER 22
+#define NODE_NUMBER 113
 
 
 //
