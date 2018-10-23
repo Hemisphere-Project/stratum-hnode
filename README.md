@@ -8,10 +8,26 @@ You can find a basic usage in demo.js
 
 
 ### Basic usage
+```js
+var hnode = require('hnode')();   // load and instanciate the library
+var server = new hnode.Server();  // instantiate a server
+server.start();                   // start the server
 ```
-  var hnode = require('hnode');     // load library
-  var server = new hnode.Server();  // instantiate a server
-  server.start();                   // start the server
+
+### Options
+```js
+var hnode = require('hnode')({
+  // This are the default options
+  PORT_SERVER: 3737,            // Working UDP port
+  TIME_TICK: 100,               // Watchdog timer ms
+  TIME_OFFLINE: 1000,           // Offline Time
+  TIME_GONE: 3000,              // Gone Time
+  NLEDS_STRIPS: 90,             // N leds per strips
+  NSTRIPS_CLIENT: 4,            // N strips per client
+  log : msg => console.log(msg) // custom log function (to write in file, etc)
+});
+var server = new hnode.Server()
+server.start()
 ```
 
 ### API

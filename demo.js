@@ -1,6 +1,15 @@
 
 // Load Hnode library
-var hnode = require('./Hnode');
+var hnode = require('./Hnode')({
+  // This is the default options when calling require('./Hnode')()
+  PORT_SERVER: 3737, // Working UDP port
+  TIME_TICK: 100, // Watchdog timer ms
+  TIME_OFFLINE: 1000, // Offline Time
+  TIME_GONE: 3000, // Gone Time
+  NLEDS_STRIPS: 90, // N leds per strips
+  NSTRIPS_CLIENT: 4, // N strips per client
+  log : msg => console.log(msg) // custom log function (to write in file, etc)
+});
 
 // Create new server
 var server = new hnode.Server();
