@@ -105,4 +105,9 @@ void leds_checker(byte modes) {
     led_set(3, 0, 20, 20, 20);
     //led_set(3, NUM_LEDS_PER_STRIP-1, 255, 0, 0);
   }
+  else if (modes == 5) {
+    for (int r=0; r<4; r++)
+      for (int l=0; l<NUM_LEDS_PER_STRIP; l++)
+         led_set(r, l, 10, 10, 10);
+  }
 }

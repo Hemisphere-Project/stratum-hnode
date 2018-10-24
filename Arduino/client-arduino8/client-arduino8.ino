@@ -4,19 +4,28 @@
 //#define DEBUG_MSG 1     // Comment to disable Received message print
 //#define USE_DHCP_ETH 1 // Comment to force static IP
 
-//
-// REPLACE NODE ID (comment once it has been done !)
-// STRATUM: 1 -> 30
-// RYTHMUS: 101 -> 113
-//
-#define NODE_NUMBER 0
-
-
-//
-// VERSION 
-//
-const int VERSION = 7;
 /*
+ * REPLACE NODE ID (comment once it has been done !)
+ * STRATUM: 1 -> 30
+ * RYTHMUS: 101 -> 113
+ */
+//#define NODE_NUMBER 113
+
+
+/*
+ * VERSION 
+ */
+const int VERSION = 8;
+const int VERSION_MIN = 2;
+/*
+ * VERSION 8:
+ * Rythmus Mod: 
+ * - led strip size
+ * - new test
+ * 
+ * VERSION 7:
+ * Disbale Wifi when not used: avoid random watchdog reboot
+ * 
  * VERSION 6:
  * Push Node Number into EEPROM to avoid reflashing Number each time !
  * Also Wifi connection is not blocking when using ETH as main pipeline
@@ -28,7 +37,7 @@ const int VERSION = 7;
 //
 const char* ssid = "stratum";
 const char* password = "9000leds";
-const bool useWIFI = false;
+const bool useWIFI = false;           // True = use wifi for data transmission / False = start wifi to enable ota, then disable if no AP found
 
 //
 // NETWORK 
@@ -53,7 +62,7 @@ void setup()
   #endif
   
   // NAME
-  sprintf(nodeName, "Hnode-%02i//%i//%i", eeprom_getID(), udpPort_node, VERSION);
+  sprintf(nodeName, "Hnode-%02i / %i / %i.%i", eeprom_getID(), udpPort_node, VERSION, VERSION_MIN);
   
   // SERIAL
   #ifdef DEBUG
@@ -66,6 +75,7 @@ void setup()
   // LEDS
   leds_init();
   leds_blackout();
+  leds_checker(5);
   leds_show();
 
   // WIFI CONNECT
