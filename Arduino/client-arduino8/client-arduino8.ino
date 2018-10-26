@@ -54,6 +54,8 @@ unsigned char incomingPacket[MTUu];  // buffer for incoming packets
 const int INFO_TIME = 500;
 unsigned long lastUpdate = 0;
 
+bool nothingYet = true;
+
 void setup()
 {
   // NODE ID
@@ -75,7 +77,6 @@ void setup()
   // LEDS
   leds_init();
   leds_blackout();
-  leds_checker(5);
   leds_show();
 
   // WIFI CONNECT
@@ -106,6 +107,12 @@ void loop()
   if ( new_data ) {
     // UPDATE LEDs with data received
     leds_set( incomingPacket );
+    leds_show();
+    nothingYet = false;
+  }
+
+  if (nothingYet) {
+    leds_checker(5);
     leds_show();
   }
 
