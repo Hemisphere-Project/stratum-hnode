@@ -54,18 +54,18 @@ function animate() {
    // 	color = [255,255,255]
    	//if ((count % 90) == 10) color = [255,0,0]
 
-    if (count%100 > 10)
-    for (var k=0; k<90; k++) {
-    node.setLed(0, k, color);
-    node.setLed(1, k, color);
-    node.setLed(2, k, color);
-      node.setLed(3, k, color);
-    }
+    // if (count%100 > 10)
+    // for (var k=0; k<90; k++) {
+    // node.setLed(0, k, color);
+    // node.setLed(1, k, color);
+    // node.setLed(2, k, color);
+    //   node.setLed(3, k, color);
+    // }
 
-    // node.setLed(0, count%90, color);
-    // node.setLed(1, count%90, color);
-    // node.setLed(2, count%90, color);
-    // node.setLed(3, count%90, color);
+    node.setLed(0, count%90, color);
+    node.setLed(1, count%90, color);
+    node.setLed(2, count%90, color);
+    node.setLed(3, count%90, color);
 
 
 

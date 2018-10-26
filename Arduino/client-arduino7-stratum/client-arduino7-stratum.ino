@@ -109,7 +109,7 @@ void loop()
     lastUpdate = millis();
 
     #if defined(DEBUG_MSG)
-      Serial.printf("INFO packet sent: %s\n", message);
+      Serial.printf("INFO packet sent: %s\n", nodeName);
     #endif
   }
   yield();

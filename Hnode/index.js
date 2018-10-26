@@ -181,6 +181,7 @@ module.exports = function (options) {
     send() {
       var that = this;
       if (this.udp == null) this.udp = dgram.createSocket('udp4');
+      // console.log(this.port, this.ip)
       if (this.payload != null) {
         this.udp.send(this.payload, 0, this.payload.length, this.port, this.ip, function(err, bytes) {
           if (err) {
@@ -190,7 +191,8 @@ module.exports = function (options) {
             }
             else throw err;
           }
-          else that.emit('sent', this.payload);
+          else that.emit('sent', that.payload);
+
         });
       }
     }
