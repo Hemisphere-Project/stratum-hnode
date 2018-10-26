@@ -13,23 +13,23 @@
 
 
 /*
- * VERSION 
+ * VERSION
  */
 const int VERSION = 8;
 const int VERSION_MIN = 2;
 /*
  * VERSION 8:
- * Rythmus Mod: 
+ * Rythmus Mod:
  * - led strip size
  * - new test
- * 
+ *
  * VERSION 7:
  * Disbale Wifi when not used: avoid random watchdog reboot
- * 
+ *
  * VERSION 6:
  * Push Node Number into EEPROM to avoid reflashing Number each time !
  * Also Wifi connection is not blocking when using ETH as main pipeline
- * 
+ *
  */
 
 //
@@ -40,7 +40,7 @@ const char* password = "9000leds";
 const bool useWIFI = false;           // True = use wifi for data transmission / False = start wifi to enable ota, then disable if no AP found
 
 //
-// NETWORK 
+// NETWORK
 //
 IPAddress server(192, 168, 0, 255);
 unsigned int udpPort_node = 3738;  // Node port to listen on
@@ -62,10 +62,10 @@ void setup()
   #ifdef NODE_NUMBER
     eeprom_setID((byte)NODE_NUMBER);
   #endif
-  
+
   // NAME
-  sprintf(nodeName, "Hnode-%02i / %i / %i.%i", eeprom_getID(), udpPort_node, VERSION, VERSION_MIN);
-  
+  sprintf(nodeName, "Hnode-%02i//%i//%i.%i", eeprom_getID(), udpPort_node, VERSION, VERSION_MIN);
+
   // SERIAL
   #ifdef DEBUG
     Serial.begin(115200);
@@ -85,7 +85,7 @@ void setup()
   // UDP SOCKET START
   if (useWIFI) wifi_start();
   else eth_start();
-   
+
 }
 
 
@@ -122,7 +122,7 @@ void loop()
     // send INFO
     if (useWIFI) wifi_send( nodeName );
     else eth_send( nodeName );
-    
+
     lastUpdate = millis();
 
     #if defined(DEBUG_MSG)
