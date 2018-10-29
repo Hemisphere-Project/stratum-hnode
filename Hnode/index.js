@@ -8,7 +8,7 @@ const defaultOptions = {
   TIME_GONE: 3000, // Gone Time
   NLEDS_STRIPS: 178, // N leds per strips
   NSTRIPS_CLIENT: 4, // N strips per client
-  CLIENT_FRAME_RATE: 70, // UDP frame sent by second (Rythmus = 2 frame to refresh a whole client)
+  CLIENT_FRAME_RATE: 60, // UDP frame sent by second (Rythmus = 2 frame to refresh a whole client)
   log : msg => console.log(msg) // custom log function (to write in file, etc)
 }
 

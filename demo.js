@@ -1,4 +1,4 @@
-CHASER_FPS = 50
+CHASER_FPS = 80
 
 // Load Hnode library
 var hnode = require('./Hnode')({
@@ -9,7 +9,7 @@ var hnode = require('./Hnode')({
   TIME_GONE: 3000, // Gone Time
   NLEDS_STRIPS: 178, // N leds per strips
   NSTRIPS_CLIENT: 4, // N strips per client
-  CLIENT_FRAME_RATE: CHASER_FPS, // UDP FRAME / secondes
+  CLIENT_FRAME_RATE: 60, // UDP FRAME / secondes
   log : msg => console.log(msg) // custom log function (to write in file, etc)
 });
 
@@ -58,6 +58,7 @@ function animate() {
   this.getAllNodes().forEach(function(node) {
     max = 30
     color = [[0,0,max],[0,max,0],[max,0,0],[max,max,max]]
+    color = [[max,max,max],[max,max,max],[max,max,max],[max,max,max]]
    // 	color = [255,255,255]
    	//if ((count % 90) == 10) color = [255,0,0]
 
