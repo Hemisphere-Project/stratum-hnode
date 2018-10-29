@@ -6,7 +6,7 @@ var hnode = require('./Hnode')({
   TIME_TICK: 100, // Watchdog timer ms
   TIME_OFFLINE: 1000, // Offline Time
   TIME_GONE: 3000, // Gone Time
-  NLEDS_STRIPS: 90, // N leds per strips
+  NLEDS_STRIPS: 178, // N leds per strips
   NSTRIPS_CLIENT: 4, // N strips per client
   log : msg => console.log(msg) // custom log function (to write in file, etc)
 });
@@ -50,7 +50,8 @@ var count = 0;
 function animate() {
   this.blackout();          // switch off every leds
   this.getAllNodes().forEach(function(node) {
-    color = [5,5,5]
+    max = 30
+    color = [[0,0,max],[0,max,0],[max,0,0],[max,max,max]]
    // 	color = [255,255,255]
    	//if ((count % 90) == 10) color = [255,0,0]
 
@@ -62,10 +63,10 @@ function animate() {
     //   node.setLed(3, k, color);
     // }
 
-    node.setLed(0, count%90, color);
-    node.setLed(1, count%90, color);
-    node.setLed(2, count%90, color);
-    node.setLed(3, count%90, color);
+    node.setLed(0, count%178, color[0]);
+    node.setLed(1, count%178, color[1]);
+    node.setLed(2, count%178, color[2]);
+    node.setLed(3, count%178, color[3]);
 
 
 

@@ -52,14 +52,14 @@ module.exports = function (options) {
     }
 
     setRate(tr) {
-      if (!this.allowRateChange) return;
+      //if (!this.allowRateChange) return;
       this.timerate = Math.round(tr);
       this.emit('fps', Math.round(100000/tr)/100);
       // options.log('FPS: '+ Math.round(100000/tr)/100);
       // this.timerate = 50;
     }
 
-    lockRate(tr) {
+    /*lockRate(tr) {
       this.allowRateChange = true;
       this.setRate(tr);
       this.allowRateChange = false;
@@ -67,7 +67,7 @@ module.exports = function (options) {
 
     unlockRate() {
       this.allowRateChange = true;
-    }
+    }*/
   }
 
   class Client extends Worker {
@@ -83,9 +83,15 @@ module.exports = function (options) {
       this.noNews = 0;
       this.udp = null;
       this.infoCounter = 0;
-      this.payload = Buffer.alloc(NLEDS*3, 0);
+      this.nextStrip = 0;
 
-      this.setRate(1000/70);
+      this.payload = []
+      for (var s=0; s<options.NSTRIPS_CLIENT; s++) {
+        this.payload[s] = Buffer.alloc(options.NLEDS_STRIPS*3+1, 0);
+        this.payload[s][0] = s    //first byte of payload is strip number
+      }
+
+      this.setRate(1000/140);
 
       // send payload at every ticks
       this.on('tick', this.send);
@@ -99,10 +105,6 @@ module.exports = function (options) {
         that.infoCounter = 0;
       });
 
-    }
-
-    _set(buffer) {
-      this.payload = buffer;
     }
 
     //
@@ -127,11 +129,11 @@ module.exports = function (options) {
     // args: strip n°, led n°, [r,g,b]
     //
     setLed(strip, led, rgb) {
-      var key = (strip * options.NLEDS_STRIPS + led) * 3;
-      if (rgb.length !== 3 || key < 0 || key >= NLEDS * 3) return;
-      this.payload[key + 0] = rgb[0];
-      this.payload[key + 1] = rgb[1];
-      this.payload[key + 2] = rgb[2];
+      var key = led * 3 + 1;
+      if (rgb.length !== 3 || key < 1 || key > options.NLEDS_STRIPS * 3) return;
+      this.payload[strip][key + 0] = rgb[0];
+      this.payload[strip][key + 1] = rgb[1];
+      this.payload[strip][key + 2] = rgb[2];
     }
 
     update(ip, info) {
@@ -181,9 +183,13 @@ module.exports = function (options) {
     send() {
       var that = this;
       if (this.udp == null) this.udp = dgram.createSocket('udp4');
-      // console.log(this.port, this.ip)
-      if (this.payload != null) {
-        this.udp.send(this.payload, 0, this.payload.length, this.port, this.ip, function(err, bytes) {
+
+
+      if (this.payload[this.nextStrip] != null) {
+        // console.log(this.port, this.ip)
+        this.udp.send(this.payload[this.nextStrip], 0, this.payload[this.nextStrip].length, this.port, this.ip, function(err, bytes) {
+          that.nextStrip+=1
+          if (that.nextStrip >= options.NSTRIPS_CLIENT) that.nextStrip = 0
           if (err) {
             if (err.code == 'ENETUNREACH' || err.code == 'EADDRNOTAVAIL') {
               options.log('\nWarning: the server lost connection to the network');
@@ -191,19 +197,22 @@ module.exports = function (options) {
             }
             else throw err;
           }
-          else that.emit('sent', that.payload);
+          else that.emit('sent', that.payload[that.nextStrip]);
 
         });
       }
     }
 
+
     randomize() {
-      // random payload
-      var data = Buffer.alloc(NLEDS*3 );
-      for (var k = 0; k<NLEDS*3; k+=1) {
-        data[k] = Math.floor(Math.random() * 255)
+      for (var s=0; s<NSTRIPS_CLIENT; s++) {
+        // random payload
+        var data = Buffer.alloc(NLEDS_STRIPS*3+1);
+        data[0] = s;
+        for (var k = 1; k<=NLEDS_STRIPS*3; k+=1)
+          data[k] = Math.floor(Math.random() * 255)
+        this.payload[s] = data;
       }
-      this._set(data);
     }
   }
 
@@ -251,6 +260,7 @@ module.exports = function (options) {
         var ip = remote.address;
         //var info = JSON.parse(message.toString('UTF-8'));
         var msg = message.toString('UTF-8').split('//')
+        if (msg.length < 3) return;
         var info = {
           'name': msg[0],
           'port': msg[1],
