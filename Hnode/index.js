@@ -6,8 +6,9 @@ const defaultOptions = {
   TIME_TICK: 100, // Watchdog timer ms
   TIME_OFFLINE: 1000, // Offline Time
   TIME_GONE: 3000, // Gone Time
-  NLEDS_STRIPS: 90, // N leds per strips
+  NLEDS_STRIPS: 178, // N leds per strips
   NSTRIPS_CLIENT: 4, // N strips per client
+  CLIENT_FRAME_RATE: 70, // UDP frame sent by second (Rythmus = 2 frame to refresh a whole client)
   log : msg => console.log(msg) // custom log function (to write in file, etc)
 }
 
@@ -55,7 +56,7 @@ module.exports = function (options) {
       //if (!this.allowRateChange) return;
       this.timerate = Math.round(tr);
       this.emit('fps', Math.round(100000/tr)/100);
-      // options.log('FPS: '+ Math.round(100000/tr)/100);
+      options.log('FPS: '+ Math.round(100000/tr)/100);
       // this.timerate = 50;
     }
 
@@ -83,15 +84,19 @@ module.exports = function (options) {
       this.noNews = 0;
       this.udp = null;
       this.infoCounter = 0;
-      this.nextStrip = 0;
+      this.nextBuffer = 0;
 
       this.payload = []
+      this.dualBuffers = []
       for (var s=0; s<options.NSTRIPS_CLIENT; s++) {
         this.payload[s] = Buffer.alloc(options.NLEDS_STRIPS*3+1, 0);
         this.payload[s][0] = s    //first byte of payload is strip number
       }
+      for (var s=0; s<options.NSTRIPS_CLIENT; s+=2) {
+        this.dualBuffers[s/2] = Buffer.alloc((options.NLEDS_STRIPS*3+1)*2, 0);
+      }
 
-      this.setRate(1000/140);
+      this.setRate(1000/(options.CLIENT_FRAME_RATE*this.dualBuffers.length));
 
       // send payload at every ticks
       this.on('tick', this.send);
@@ -184,8 +189,32 @@ module.exports = function (options) {
       var that = this;
       if (this.udp == null) this.udp = dgram.createSocket('udp4');
 
+      // Push-Pull strips (dual strip)
 
-      if (this.payload[this.nextStrip] != null) {
+      // Refresh buffer
+      if (this.nextBuffer == 0)
+        for (var b=0; b<options.NSTRIPS_CLIENT; b+=2) {
+          this.dualBuffers[b/2].set(this.payload[b], 0)
+          this.dualBuffers[b/2].set(this.payload[b+1], (options.NLEDS_STRIPS*3+1))
+        }
+
+      // Send next buffer
+      var dualPayload = this.dualBuffers[this.nextBuffer]
+      this.udp.send(dualPayload, 0, dualPayload.length, this.port, this.ip, function(err, bytes) {
+        if (err) {
+          if (err.code == 'ENETUNREACH' || err.code == 'EADDRNOTAVAIL') {
+            options.log('\nWarning: the server lost connection to the network');
+            that.stop();
+          }
+          else throw err;
+        }
+        else that.emit('sent', dualPayload);
+      });
+      this.nextBuffer+=1
+      if (this.nextBuffer >= this.dualBuffers.length) this.nextBuffer = 0
+
+      // Round-Robin strips
+      /*if (this.payload[this.nextStrip] != null) {
         // console.log(this.port, this.ip)
         this.udp.send(this.payload[this.nextStrip], 0, this.payload[this.nextStrip].length, this.port, this.ip, function(err, bytes) {
           that.nextStrip+=1
@@ -200,9 +229,9 @@ module.exports = function (options) {
           else that.emit('sent', that.payload[that.nextStrip]);
 
         });
-      }
-    }
+      }*/
 
+    }
 
     randomize() {
       for (var s=0; s<NSTRIPS_CLIENT; s++) {

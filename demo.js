@@ -1,3 +1,4 @@
+CHASER_FPS = 50
 
 // Load Hnode library
 var hnode = require('./Hnode')({
@@ -8,8 +9,10 @@ var hnode = require('./Hnode')({
   TIME_GONE: 3000, // Gone Time
   NLEDS_STRIPS: 178, // N leds per strips
   NSTRIPS_CLIENT: 4, // N strips per client
+  CLIENT_FRAME_RATE: CHASER_FPS, // UDP FRAME / secondes
   log : msg => console.log(msg) // custom log function (to write in file, etc)
 });
+
 
 // Create new server
 var server = new hnode.Server();
@@ -40,6 +43,9 @@ server.on('newnode', function(node) {
   // Event: when the node stop
   node.on('fps', function(fps){ console.log('FPS '+this.name+' '+fps) });
 
+  // node.on('sent', function(msg){ console.log('MSG '+this.name+' '+msg) });
+
+
   // Manual locked rate
   // node.lockRate(0.0001);
 
@@ -63,12 +69,12 @@ function animate() {
     //   node.setLed(3, k, color);
     // }
 
-    node.setLed(0, count%178, color[0]);
-    node.setLed(1, count%178, color[1]);
-    node.setLed(2, count%178, color[2]);
-    node.setLed(3, count%178, color[3]);
+    var led = count%178
 
-
+    for (var i=0; i<4; i++) {
+      node.setLed(i, (178-led), color[i]);
+      node.setLed(i, led, color[i]);
+    }
 
   });
   count += 1;
@@ -78,7 +84,7 @@ function animate() {
 server.on('tick', animate);
 
 // Set Server sequencer timing @ 50 FPS
-server.setRate(1000/100);
+server.setRate(1000/CHASER_FPS);
 
 // Start server
 server.start();
