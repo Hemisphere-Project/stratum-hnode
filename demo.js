@@ -1,4 +1,4 @@
-CHASER_FPS = 80
+CHASER_FPS = 50
 
 // Load Hnode library
 var hnode = require('./Hnode')({
@@ -55,8 +55,9 @@ server.on('newnode', function(node) {
 var count = 0;
 function animate() {
   this.blackout();          // switch off every leds
+  var CC = 0;
   this.getAllNodes().forEach(function(node) {
-    max = 30
+    max = 255
     color = [[0,0,max],[0,max,0],[max,0,0],[max,max,max]]
     color = [[max,max,max],[max,max,max],[max,max,max],[max,max,max]]
    // 	color = [255,255,255]
@@ -70,15 +71,58 @@ function animate() {
     //   node.setLed(3, k, color);
     // }
 
-    var led = count%178
+    // CHASER
+    if (true) {
 
-    for (var i=0; i<4; i++) {
-      node.setLed(i, (178-led), color[i]);
-      node.setLed(i, led, color[i]);
+      for (var i=0; i<4; i++) {
+        var led = (count+CC*10+i*8)%178
+        node.setLed(i, (177-led), color[i]);
+        node.setLed(i, led, color[i]);
+      }
     }
+
+    // BLINK IN/OUT
+    else if (false) {
+      var p = 100
+      for (var i=0; i<4; i++)
+        if (count%p < p/2)
+          for (var l=0; l<89; l++)
+            node.setLed(i, l, color[i])
+        else
+          for (var l=89; l<178; l++)
+            node.setLed(i, l, color[i])
+    }
+
+    // BREATH
+    else if (false) {
+      var amp = 150
+      var c = count%(amp*2)
+      if (c > amp) c = amp*2 - c
+      // console.log(c)
+      for (var i=0; i<4; i++)
+        for (var l=0; l<178; l++)
+          node.setLed(i, l, [c,c,c])
+    }
+
+    // STARSHOT
+    else if (true) {
+      var amp = 150
+      var c = count%(amp*2)
+      if (c > amp) c = amp*2 - c
+      // console.log(c)
+      for (var i=0; i<4; i++)
+          if (Math.random() >= 0.5) for (var l=0; l<98; l++)
+            if (Math.random() >= 0.95) {
+              node.setLed(i, l, [255,255,255])
+              node.setLed(i, l+87, [255,255,255])
+            }
+    }
+
+    CC += 1;
 
   });
   count += 1;
+
 }
 
 // Bind animation to Server sequencer

@@ -136,9 +136,22 @@ module.exports = function (options) {
     setLed(strip, led, rgb) {
       var key = led * 3 + 1;
       if (rgb.length !== 3 || key < 1 || key > options.NLEDS_STRIPS * 3) return;
-      this.payload[strip][key + 0] = rgb[0];
-      this.payload[strip][key + 1] = rgb[1];
-      this.payload[strip][key + 2] = rgb[2];
+
+      // VOLTAGE DROP CORRECTOR
+      var level = (rgb[0]+rgb[1]+rgb[2])/(3*255)
+      level = Math.max(0, level-0.2)
+      var dec = level * (options.NLEDS_STRIPS-led)/2
+      var blue_dec = level * (options.NLEDS_STRIPS-led)/3
+      var red_dec = level * led/3
+
+      rgb[0] = Math.max(0, (rgb[0] - dec) - red_dec)
+      rgb[1] = Math.max(0, (rgb[1] - dec))
+      rgb[2] = Math.max(0, (rgb[2] - dec - blue_dec))
+      // console.log(led, rgb, dec)
+
+      this.payload[strip][key + 0] = Math.floor(rgb[0]);
+      this.payload[strip][key + 1] = Math.floor(rgb[1]);
+      this.payload[strip][key + 2] = Math.floor(rgb[2]);
     }
 
     update(ip, info) {
