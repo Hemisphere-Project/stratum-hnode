@@ -9,6 +9,7 @@ const defaultOptions = {
   NLEDS_STRIPS: 178, // N leds per strips
   NSTRIPS_CLIENT: 4, // N strips per client
   CLIENT_FRAME_RATE: 60, // UDP frame sent by second (Rythmus = 2 frame to refresh a whole client)
+  CORRECT_VOLTAGE_DROP: true, // See setLed(). Set it to false if you're using mocked leds
   log : msg => console.log(msg) // custom log function (to write in file, etc)
 }
 
@@ -137,17 +138,19 @@ module.exports = function (options) {
       var key = led * 3 + 1;
       if (rgb.length !== 3 || key < 1 || key > options.NLEDS_STRIPS * 3) return;
 
-      // VOLTAGE DROP CORRECTOR
-      var level = (rgb[0]+rgb[1]+rgb[2])/(3*255)
-      level = Math.max(0, level-0.2)
-      var dec = level * (options.NLEDS_STRIPS-led)/2
-      var blue_dec = level * (options.NLEDS_STRIPS-led)/3
-      var red_dec = level * led/3
+      if (options.CORRECT_VOLTAGE_DROP) {
+        // VOLTAGE DROP CORRECTOR
+        var level = (rgb[0]+rgb[1]+rgb[2])/(3*255)
+        level = Math.max(0, level-0.2)
+        var dec = level * (options.NLEDS_STRIPS-led)/2
+        var blue_dec = level * (options.NLEDS_STRIPS-led)/3
+        var red_dec = level * led/3
 
-      rgb[0] = Math.max(0, (rgb[0] - dec) - red_dec)
-      rgb[1] = Math.max(0, (rgb[1] - dec))
-      rgb[2] = Math.max(0, (rgb[2] - dec - blue_dec))
-      // console.log(led, rgb, dec)
+        rgb[0] = Math.max(0, (rgb[0] - dec) - red_dec)
+        rgb[1] = Math.max(0, (rgb[1] - dec))
+        rgb[2] = Math.max(0, (rgb[2] - dec - blue_dec))
+        // console.log(led, rgb, dec)
+      }
 
       this.payload[strip][key + 0] = Math.floor(rgb[0]);
       this.payload[strip][key + 1] = Math.floor(rgb[1]);
