@@ -9,13 +9,13 @@
 // STRATUM: 1 -> 30
 // RYTHMUS: 101 -> 113
 //
-#define NODE_NUMBER 104
+//#define NODE_NUMBER 109
 
 
 //
 // VERSION 
 //
-const int VERSION = 10;
+const int VERSION = 11;
 /*
  * VERSION 8:
  * Rythmus: dual strip message
@@ -76,17 +76,17 @@ void setup()
     Serial.println(nodeName);
   #endif
 
-  // LEDS
-  leds_init();
-  leds_blackout();
-  leds_show();
-
   // WIFI CONNECT
   wifi_init();
 
   // UDP SOCKET START
   if (useWIFI) wifi_start();
   else eth_start();
+
+  // LEDS
+  leds_init();
+  leds_blackout();
+  leds_show();
    
 }
 

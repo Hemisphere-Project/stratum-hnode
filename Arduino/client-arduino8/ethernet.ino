@@ -1,6 +1,6 @@
 #include <SPI.h>         // needed for Arduino versions later than 0018
-#include <Ethernet2.h>
-#include <EthernetUdp2.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
+#include <Ethernet.h>
+#include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
 
 #define WIZ_RESET 3
 #define WIZ_CS 15
@@ -77,5 +77,3 @@ void eth_send(char message[30]) {
 unsigned int eth_port() {
   return udpPort_node;
 }
-
-

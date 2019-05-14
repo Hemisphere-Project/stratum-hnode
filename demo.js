@@ -75,14 +75,15 @@ function animate() {
     if (true) {
 
       for (var i=0; i<4; i++) {
-        var led = (count+CC*10+i*8)%178
+        //var led = (count+CC*10+i*8)%178
+        var led = count%178;
         node.setLed(i, (177-led), color[i]);
         node.setLed(i, led, color[i]);
       }
     }
 
     // BLINK IN/OUT
-    else if (false) {
+    else if (true) {
       var p = 100
       for (var i=0; i<4; i++)
         if (count%p < p/2)
@@ -94,10 +95,11 @@ function animate() {
     }
 
     // BREATH
-    else if (false) {
+    else if (true) {
       var amp = 150
       var c = count%(amp*2)
       if (c > amp) c = amp*2 - c
+      //c = c*c/255
       // console.log(c)
       for (var i=0; i<4; i++)
         for (var l=0; l<178; l++)
@@ -111,10 +113,10 @@ function animate() {
       if (c > amp) c = amp*2 - c
       // console.log(c)
       for (var i=0; i<4; i++)
-          if (Math.random() >= 0.5) for (var l=0; l<98; l++)
+          if (Math.random() >= 0.0) for (var l=0; l<98; l++)
             if (Math.random() >= 0.95) {
               node.setLed(i, l, [255,255,255])
-              node.setLed(i, l+87, [255,255,255])
+              node.setLed(i, l+87, [255,255,Math.random()*255])
             }
     }
 
