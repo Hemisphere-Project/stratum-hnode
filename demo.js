@@ -72,7 +72,7 @@ function animate() {
     // }
 
     // CHASER
-    if (true) {
+    if (false) {
 
       for (var i=0; i<4; i++) {
         //var led = (count+CC*10+i*8)%178
@@ -83,7 +83,7 @@ function animate() {
     }
 
     // BLINK IN/OUT
-    else if (true) {
+    else if (false) {
       var p = 100
       for (var i=0; i<4; i++)
         if (count%p < p/2)
@@ -95,7 +95,7 @@ function animate() {
     }
 
     // BREATH
-    else if (true) {
+    else if (false) {
       var amp = 150
       var c = count%(amp*2)
       if (c > amp) c = amp*2 - c
@@ -107,7 +107,7 @@ function animate() {
     }
 
     // STARSHOT
-    else if (true) {
+    else if (false) {
       var amp = 150
       var c = count%(amp*2)
       if (c > amp) c = amp*2 - c
@@ -118,6 +118,14 @@ function animate() {
               node.setLed(i, l, [255,255,255])
               node.setLed(i, l+87, [255,255,Math.random()*255])
             }
+    }
+    
+    // ALL IN
+    else if (true) {
+      var amp = 200
+      for (var i=0; i<4; i++)
+        for (var l=0; l<178; l++)
+          node.setLed(i, l, [amp,amp,amp])
     }
 
     CC += 1;
